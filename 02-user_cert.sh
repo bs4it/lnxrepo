@@ -55,11 +55,16 @@ fi
 # gera numero aleatorio entre 11000 e 43767
 ssh_port=$(($RANDOM+11000))
 sed -i "/Port /c\Port $ssh_port" /etc/ssh/sshd_config
+echo "Configurando SSH na porta $ssh_port"
+sleep 1
 /etc/init.d/ssh restart
+echo "Configurando Firewall"
 ufw --force reset
 ufw --force enable
 ufw allow $ssh_port/tcp
 ufw allow 2500:5000/tcp
+sleep 1
+echo "Criando usuario $username"
 useradd -s /bin/bash -b /var/lib -c "Veeam Linux user Backup" -m $username
 passwd=`openssl rand -base64 32`
 echo "$username:$passwd" | chpasswd
@@ -68,9 +73,11 @@ passphrase=`openssl rand -base64 32`
 su -l $username -c "rm -f /var/lib/$username/.ssh/*"
 su -l $username -c "ssh-keygen -f /var/lib/$username/.ssh/id_rsa -N $passphrase -C Key_for_Veeam_Linux_user_Backup -O no-x11-forwarding -O no-port-forwarding -O no-agent-forwarding"
 su -l $username -c "cat /var/lib/$username/.ssh/id_rsa.pub > /var/lib/$username/.ssh/authorized_keys"
+echo "Criando mount point $mountpoint"
 mkdir -p $mountpoint
 chown $username $mountpoint
 chmod 700 $mountpoint
+sleep 1
 clear
 echo -e "\e[32m###################################################################"
 echo -e "Acesse http://`ifconfig | grep inet | grep -v inet6 | grep -v 127.0.0.1 | sed -e 's/^[[:space:]]*//' | cut -d " " -f 2`:4080,"
@@ -104,6 +111,18 @@ python3 -m http.server 4080 && rm -f index.html
 clear
 echo "Limpando arquivos temporarios..."
 echo "Script finalizado."
+echo "Reiniciando em 5 segundos..."
+sleep 1
+echo "Reiniciando em 4 segundos..."
+sleep 1
+echo "Reiniciando em 3 segundos..."
+sleep 1
+echo "Reiniciando em 2 segundos..."
+sleep 1
+echo "Reiniciando em 1 segundos..."
+sleep 1
+echo "Reiniciando..."
+/sbin/shutdown -r now
 exit
 
 
