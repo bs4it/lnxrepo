@@ -98,7 +98,7 @@ echo "</p>" >> index.html
 echo "<p>" >> index.html
 echo "<h3>Copie ate a linha acima</h3>" >> index.html
 echo "</p>" >> index.html
-echo "<p>Realize o download do <a href="https://the.earth.li/~sgtatham/putty/latest/w32/puttygen.exe">PuttyGen</a> para converter a chave privada do formato PEM para o formato PPK, compatível com o Veeam.</p>" >> index.html
+echo '<p>Realize o download do <a href="https://the.earth.li/~sgtatham/putty/latest/w32/puttygen.exe">PuttyGen</a> para converter a chave privada do formato PEM para o formato PPK, compatível com o Veeam.<br>Este ferramenta também pode ser encontrada no Veeam Server em <i>C:\Program Files\Veeam\Backup and Replication\Backup\Putty\</i></p>' >> index.html
 echo "<p>" >> index.html
 echo "<b>Hostname:</b> `hostname -f`<br>" >> index.html 
 echo "<b>Username:</b> $username<br>" >> index.html 
