@@ -8,13 +8,21 @@ echo -e "\e[32mEASY VEEAM LINUX REPOSITORY SCRIPT - BS4IT\e[39m"
 echo " "
 echo " "
 echo " "
-echo "Instalar pacotes necessarios?"
+echo "Atualizar sistema e Instalar pacotes necessarios?"
 while [[ -z $installpkgs ]]
 do
 	echo -e "Digite \e[97mS\e[39m ou \e[97mN\e[39m:"
 	read installpkgs
 done
 if [ $installpkgs == "S" ] || [ $installpkgs == "s" ]; then
+	clear
+	echo "Atualizando base do APT"
+	apt-get update -y
+	clear
+	echo "Atualizando S.O."
+	apt-get upgrade -y
+	clear
+	echo "Instalando pacotes"
 	apt-get install build-essential -y
 	cpan constant Carp Cwd Data::Dumper Encode Encode::Alias Encode::Config Encode::Encoding Encode::MIME::Name Exporter Exporter::Heavy File::Path File::Spec File::Spec::Unix File::Temp List::Util Scalar::Util Socket Storable threads
 echo " "
@@ -96,17 +104,6 @@ python3 -m http.server 4080 && rm -f index.html
 clear
 echo "Limpando arquivos temporarios..."
 echo "Script finalizado."
-echo "Saindo em 5 segundos"
-sleep 1
-echo "Saindo em 4 segundos"
-sleep 1
-echo "Saindo em 3 segundos"
-sleep 1
-echo "Saindo em 2 segundos"
-sleep 1
-echo "Saindo em 1 segundos"
-sleep 1
-echo "Saindo em 0 segundos"
 exit
 
 
