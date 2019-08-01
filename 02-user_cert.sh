@@ -1,10 +1,39 @@
 #!/bin/bash
 
+if [ -f "/etc/debian_version" ]; then
+	so="deb"
+else
+	if [ -f "/etc/redhat-release" ]; then
+		so="rhel"
+		if [ `rpm -E %{rhel}` == "6" ]; then
+			rhver="6"
+			echo "Versão de RHEL não suportada."
+		elif [ `rpm -E %{rhel}` == "7" ]; then
+			rhver="7"
+		fi
+	else
+		#SO nao suportado
+		echo "Seu Sistema operacional não é suportado"
+		echo " "
+		echo "Sistemas operacionais suportados:"
+		echo "Ubuntu Server 16.04"
+		echo "Ubuntu Server 18.04"
+		echo "CentOS 7"
+		echo "Oracle Enterprise Linux 7"
 
+		exit 
+	fi
+fi
 
 clear
 echo " "
 echo -e "\e[32mEASY VEEAM LINUX REPOSITORY SCRIPT - BS4IT\e[39m"
+echo " "
+echo " "
+echo " "
+
+
+
 echo " "
 echo " "
 echo " "
@@ -16,15 +45,29 @@ do
 done
 if [ $installpkgs == "S" ] || [ $installpkgs == "s" ]; then
 	clear
-	echo "Atualizando base do APT"
-	apt-get update -y
-	clear
-	echo "Atualizando S.O."
-	apt-get upgrade -y
-	clear
-	echo "Instalando pacotes"
-	apt-get install build-essential -y
+	if [ $so == "deb" ]; then
+		echo "Atualizando base do APT"
+		sleep 1
+		apt-get update -y
+		clear
+		echo "Atualizando S.O."
+		sleep 1
+		apt-get upgrade -y
+		clear
+		echo "Instalando pacotes"
+		sleep 1
+		apt-get install net-tools build-essential -y
 	cpan constant Carp Cwd Data::Dumper Encode Encode::Alias Encode::Config Encode::Encoding Encode::MIME::Name Exporter Exporter::Heavy File::Path File::Spec File::Spec::Unix File::Temp List::Util Scalar::Util Socket Storable threads
+	else
+		clear
+		echo "Atualizando S.O."
+		sleep 1
+		yum update -y
+		clear
+		echo "Instalando pacotes"
+		sleep 1
+		yum install vim tcpdump net-tools perl perl-Data-Dumper policycoreutils-python -y
+	fi
 echo " "
 echo "Pressione Enter para continuar:"
 read
@@ -35,6 +78,34 @@ echo " "
 echo " "
 echo " "
 fi
+# gera numero aleatorio entre 11000 e 43767
+ssh_port=$(($RANDOM+11000))
+service sshd restart
+
+# Configura o firewall local
+echo "Configurando Firewall"
+if [ $so == "deb" ]; then
+	ufw --force reset
+	ufw --force enable
+	ufw allow $ssh_port/tcp
+	ufw allow 2500:5000/tcp
+	sleep 1
+else
+	for srv in $(firewall-cmd --list-services);do firewall-cmd --remove-service=$srv; done
+	for prt in $(firewall-cmd --list-ports);do firewall-cmd --remove-port=$prt; done
+	firewall-cmd --add-port=$ssh_port/tcp
+	firewall-cmd --add-port=2500-5000/tcp
+	firewall-cmd --runtime-to-permanent
+	semanage port -D
+	semanage port -a -t ssh_port_t -p tcp $ssh_port
+fi
+
+# Ajusta SSH e reinicia o servico
+sed -i "/Port /c\Port $ssh_port" /etc/ssh/sshd_config
+echo "Configurando SSH na porta $ssh_port"
+sleep 1
+service sshd restart
+
 
 usernamedefault=veeambackup
 echo "Insira o nome do usuario (veeambackup):"
@@ -52,18 +123,6 @@ then
 	mountpoint=$mountpointdefault
 fi
 
-# gera numero aleatorio entre 11000 e 43767
-ssh_port=$(($RANDOM+11000))
-sed -i "/Port /c\Port $ssh_port" /etc/ssh/sshd_config
-echo "Configurando SSH na porta $ssh_port"
-sleep 1
-/etc/init.d/ssh restart
-echo "Configurando Firewall"
-ufw --force reset
-ufw --force enable
-ufw allow $ssh_port/tcp
-ufw allow 2500:5000/tcp
-sleep 1
 echo "Criando usuario $username"
 useradd -s /bin/bash -b /var/lib -c "Veeam Linux user Backup" -m $username
 passwd=`openssl rand -base64 32`
@@ -83,7 +142,7 @@ echo -e "\e[32m#################################################################
 echo -e "Acesse http://`ifconfig | grep inet | grep -v inet6 | grep -v 127.0.0.1 | sed -e 's/^[[:space:]]*//' | cut -d " " -f 2`:4080,"
 echo -e "Para ter acesso aos dados da chave publica privada"
 echo -e ""
-echo -e "Ao concluir retorne a esta tela e pressione CTRL+C para prosseguir."
+echo -e "Ao concluir retorne a esta tela, digite OK e pressione ENTER."
 echo -e "###################################################################\e[39m"
 echo '<html><head><meta http-equiv="Content-Type" content="text/html; charset=utf-8"><title>Dados de acesso ao repositorio.</title></head>' >index.html
 echo "<body>" >> index.html
@@ -108,22 +167,38 @@ echo "</font>" >> index.html
 echo "</body>" >> index.html
 echo "</html>" >> index.html
 echo " "
-python3 -m http.server 4080 && rm -f index.html
-clear
-echo "Limpando arquivos temporarios..."
-echo "Script finalizado."
-echo "Reiniciando em 5 segundos..."
-sleep 1
-echo "Reiniciando em 4 segundos..."
-sleep 1
-echo "Reiniciando em 3 segundos..."
-sleep 1
-echo "Reiniciando em 2 segundos..."
-sleep 1
-echo "Reiniciando em 1 segundos..."
-sleep 1
-echo "Reiniciando..."
-/sbin/shutdown -r now
-exit
-
+if [ $so == "deb" ]; then
+	python3 -m http.server 4080 &
+	wspid=$!
+elif [ $rhver == "7" ]; then
+	python -m SimpleHTTPServer 4080 &
+	wspid=$!
+	echo "o pid é $wspid"
+fi
+while true; do
+read -p "Digite OK e tecle ENTER para prosseguir:" ok
+if [ -z $ok ]
+then
+        ok="bad"
+fi
+if [ $ok == "OK" ] || [ $ok == "ok" ]; then
+	clear
+	echo "Limpando arquivos temporarios..."
+	kill -9 $wspid > /dev/null
+	echo "Script finalizado."
+	echo "Reiniciando em 5 segundos..."
+	sleep 1
+	echo "Reiniciando em 4 segundos..."
+	sleep 1
+	echo "Reiniciando em 3 segundos..."
+	sleep 1
+	echo "Reiniciando em 2 segundos..."
+	sleep 1
+	echo "Reiniciando em 1 segundos..."
+	sleep 1
+	echo "Reiniciando..."
+	/sbin/shutdown -r now
+	exit
+fi
+done
 
