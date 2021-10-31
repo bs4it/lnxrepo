@@ -8,7 +8,7 @@ echo "Os valores inseridos serao inseridos nas configuracoes sem validacao."
 echo "A configuração sera aplicada a primeira interface encontrada no sistema: $nic"
 echo "!!!DIGITE COM CUIDADO!!!"
 echo ""
-read -p "Hostname (sem sufixo)" newhostname
+read -p "Hostname (sem sufixo): " newhostname
 read -p "Endereco IP para $nic: " ip
 read -p "Mascara de rede: " nmask
 read -p "Gateway: " gw
