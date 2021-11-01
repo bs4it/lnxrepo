@@ -4,7 +4,6 @@ detect_os () {
     # Define compatible distros
     distros=("debian-11" "ubuntu-20.04" "ol-8.4")
     kernel_minimal="5.4"
-
     # Get Release data
     source /etc/os-release
     os=$ID"-"$VERSION_ID
@@ -18,7 +17,11 @@ detect_os () {
     else
         compatible_kernel=0
     fi
-
+    if [ -f "/etc/debian_version" ]; then
+        os_family="debian"
+    elif [ -f "/etc/redhat-release" ]; then
+        os_family="redhat"
+    fi
     if [ $compatible_distro == 1 ] && [ $compatible_kernel == 1 ]; then
             echo "Seu Sistema operacional é suportado! :)"
         echo "Sistema detectado - $os, Kernel $kernel_major.$kernel_minor"
