@@ -22,16 +22,18 @@ echo -e "${WHITE}Removendo sessoes e nodes existentes"
 iscsiadm -m node --logout
 iscsiadm -m node -o delete
 rm -rf /etc/iscsi/send_targets/*
-
+echo ""
+sleep 1
 echo -e "${WHITE}Ajustando hostname do initiator"
 myhostname=`hostname -s`
 initiatorname="iqn.2014-04.br.com.bs4it:$myhostname"
 echo "InitiatorName=$initiatorname" > /etc/iscsi/initiatorname.iscsi
 echo ""
+sleep 1
 echo -e "${WHITE}Ajustando conexao automatica iSCSI"
 sed -i "s/^node.startup = manual.*/# node.startup = manual/" /etc/iscsi/iscsid.conf
 sed -i "s/^# node.startup = automatic.*/node.startup = automatic/" /etc/iscsi/iscsid.conf
-
+echo ""
 read -p "Insira o IP do iSCSI (NAS):" ip
 echo -e "${WHITE}Logando em $ip..."
 iscsiadm -m discovery -t sendtargets -p $ip
@@ -55,6 +57,7 @@ echo -e "${WHITE}Conectando ao target..."
 iscsiadm -m node --loginall all
 echo ""
 echo -e "${WHITE}Os seguintes discos estão conectados:"
+sleep 1
 lsscsi -s
 echo -e "${WHITE}Bye!"
 
