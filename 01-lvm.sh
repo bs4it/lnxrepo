@@ -69,7 +69,7 @@ if [ $result != 0 ]; then
 fi
 echo " "
 echo "Criando volume group:"
-vgcreate vg_veeambackup /dev/$blkdevice
+vgcreate vg_backup /dev/$blkdevice
 result=$?
 if [ $result != 0 ]; then
 	echo "Falha ao criar volume group - erro $result"
@@ -78,7 +78,7 @@ if [ $result != 0 ]; then
 fi
 echo " "
 echo "Criando logical volume usando todo espaco disponivel:"
-lvcreate -l 100%FREE -n lv_veeambackup vg_veeambackup
+lvcreate -l 100%FREE -n lv_backup vg_backup
 result=$?
 if [ $result != 0 ]; then
 	echo "Falha ao criar logical volume - erro $result"
@@ -87,7 +87,7 @@ if [ $result != 0 ]; then
 fi
 echo " "
 echo "Criando File System com suporte a arquivos grandes:"
-mkfs.ext4 -L largefile4 /dev/vg_veeambackup/lv_veeambackup
+mkfs.xfs /dev/vg_backup/lv_backup
 result=$?
 if [ $result != 0 ]; then
 	echo "Falha ao criar sistema de arquivos - erro $result"
@@ -98,7 +98,7 @@ echo " "
 echo "Checando se o fstab já contem o mount point..."
 fstabmount=`grep /dev/mapper/vg_veeambackup-lv_veeambackup /etc/fstab`
 if [ -z $fstabmount ]; then
-	mountpointdefault="/veeambackup"
+	mountpointdefault="/backup"
 	echo "Insira o path onde o volume devera ser montado (Ex. /veeambackup): "
 	read mountpoint
 	if [ -z $mountpoint ]
@@ -109,7 +109,7 @@ if [ -z $fstabmount ]; then
 	mkdir -p $mountpoint
 	sleep 1
         echo "Inserindo mount mount no arquivo /etc/fstab:"
-	echo "/dev/mapper/vg_veeambackup-lv_veeambackup $mountpoint ext4    defaults        0       0" >> /etc/fstab
+	echo "/dev/mapper/vg_backup-lv_backup $mountpoint xfs    defaults        0       0" >> /etc/fstab
 else
         echo "Mount point ja existente, o arquivo /etc/fstab nao sera alterado."
 fi
@@ -122,11 +122,9 @@ if [ $result != 0 ]; then
         echo "Verifique fstab"
 else
 	echo "Filesystems montados com sucesso."
-	echo "novo volume montado com sucesso em `grep /dev/mapper/vg_veeambackup-lv_veeambackup /etc/fstab | cut -d " " -f 2`."
+	echo "novo volume montado com sucesso em `grep /dev/mapper/vg_backup-lv_backup /etc/fstab | cut -d " " -f 2`."
 fi
 echo " "
 echo " "
 echo "Processo concluido"
 echo " "
-
-
