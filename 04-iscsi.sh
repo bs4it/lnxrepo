@@ -1,8 +1,5 @@
 #!/bin/bash
-RED='\033[1;31m'
-YELLOW='\033[1;33m'
-WHITE='\033[1;37m'
-NC='\033[0m' # No Color
+source functions/colors.sh
 clear
 ok="foo"
 echo -e "${RED}CUIDADO!"
