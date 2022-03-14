@@ -10,4 +10,4 @@ apt-get upgrade -y
 clear
 echo "Instalando pacotes"
 sleep 1
-apt-get install wget python3 net-tools vim tcpdump iptraf-ng htop sysstat nfs-common sudo tmux ufw -y
+apt-get install wget python3 net-tools vim tcpdump iptraf-ng htop sysstat xfsprogs open-iscsi lsscsi nfs-common sudo tmux ufw -y
