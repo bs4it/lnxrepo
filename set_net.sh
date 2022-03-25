@@ -1,8 +1,9 @@
 #!/bin/bash
 # 2022 - Fernando Della Torre
-source functions/colors.sh
-source functions/IPprefix_by_netmask.sh
-source functions/detect_os.sh
+source $(dirname "$0")/functions/colors.sh
+source $(dirname "$0")/functions/IPprefix_by_netmask.sh
+source $(dirname "$0")/functions/detect_os.sh
+source $(dirname "$0")/functions/build_banner.sh
 clear
 detect_os
 #os="debian-11"
@@ -16,16 +17,14 @@ fi
 #nic=`sudo lshw -class network | grep "logical name\|nome lógico" | cut -d ":" -f 2 | head -1 | xargs`
 nics=($(ls -l /sys/class/net/ | grep -v virtual | cut -d " " -f9 | grep .))
 clear
-echo -e "\e[1;97;42m                                                                              ${NC}"
-echo -e "\e[1;97;42m                        NETWORK INTERFACE CONFIGURATION                       ${NC}"
-echo -e "\e[1;97;42m                                                                   bs4it@2022 ${NC}"
+build_banner "NETWORK INTERFACE CONFIGURATION" "bs4it@2022"
 echo " "
 echo -e "${YELLOW}ATTENTION!${NC}"
 echo ""
-echo -e "If you are using any special network configuration like vlan tagging, network"
-echo -e "teaming or bridging, please ${LRED}DON'T${NC} go ahead."
+echo -e "If you are using any special network configuration like vlan tagging, network teaming or bridging, please ${LRED}DON'T${NC} go ahead."
 echo -e "You must perform the configurations manually."
 echo ""
+accept=""
 while ! [[ $accept = 'Y' || $accept = 'y' || $accept = 'N' || $accept = 'n' ]]
 do
 	echo -n -e "Do you really want to go ahead? ${YELLOW}(Y/N)${NC}:"
@@ -38,14 +37,12 @@ do
 			;;
 		n|N)
 			echo "Quitting, bye!"
-			exit 0
+			exit 2
 			;;
   	esac
 done
 clear
-echo -e "\e[1;97;42m                                                                              ${NC}"
-echo -e "\e[1;97;42m                        NETWORK INTERFACE CONFIGURATION                       ${NC}"
-echo -e "\e[1;97;42m                                                                   bs4it@2022 ${NC}"
+build_banner "NETWORK INTERFACE CONFIGURATION" "bs4it@2022"
 echo " "
 echo -e "${YELLOW}NIC Selection:${NC}"
 echo ""
@@ -71,9 +68,7 @@ echo ""
 echo -e "Selected NIC ${YELLOW}$nic${NC}"
 sleep 1
 clear
-echo -e "\e[1;97;42m                                                                              ${NC}"
-echo -e "\e[1;97;42m                        NETWORK INTERFACE CONFIGURATION                       ${NC}"
-echo -e "\e[1;97;42m                                                                   bs4it@2022 ${NC}"
+build_banner "NETWORK INTERFACE CONFIGURATION" "bs4it@2022"
 echo " "
 echo -e "${YELLOW}Setting up interface: $nic${NC}"
 echo ""
@@ -128,15 +123,15 @@ done
 # get current hostname
 hostname=`hostname -s`
 # add new hostname to /etc/hosts
-sudo sed -i "/$hostname/c\127.0.0.1\t$newhostname.$dnssuffix\t$newhostname\n127.0.0.1\t$hostname.$dnssuffix\t$hostname" /etc/hosts > /dev/null
+sed -i "/$hostname/c\127.0.0.1\t$newhostname.$dnssuffix\t$newhostname\n127.0.0.1\t$hostname.$dnssuffix\t$hostname" /etc/hosts > /dev/null
 # set new hostname
-sudo hostnamectl set-hostname $newhostname 
+hostnamectl set-hostname $newhostname 
 
 if [ $os == "debian-11" ]; then
 	# Backups original config
 	mv /etc/network/interfaces /etc/network/interfaces.$(date +%Y-%m-%d_%Hh%Mm%Ss)
 	# creates a new config containing only loopback and sourcing interfaces.d folder
-	sudo bash -c "cat > /etc/network/interfaces" <<EOF
+	cat > /etc/network/interfaces <<EOF
 # This file describes the network interfaces available on your system
 # and how to activate them. For more information, see interfaces(5).
 
@@ -153,7 +148,7 @@ EOF
 	else
 		gw_line=""
 	fi
-	sudo bash -c "cat > /etc/network/interfaces.d/$nic" <<EOF
+	cat > /etc/network/interfaces.d/$nic <<EOF
 # This file describes the network interface $nic
 auto $nic
 iface $nic inet static
@@ -163,17 +158,17 @@ iface $nic inet static
   dns-nameservers $dns1 $dns2
 EOF
 	# creates resolv.conf file
-	sudo bash -c "cat > /etc/resolv.conf" <<EOF
+	cat > /etc/resolv.conf <<EOF
 domain $dnssuffix
 search $dnssuffix
 nameserver $dns1
 nameserver $dns2
 EOF
 echo "Applying Network Configuration..."
-sudo systemctl restart networking.service
+systemctl restart networking.service
 elif [ $os == "ubuntu-20.04" ]; then
-	sudo rm -f /etc/netplan/*.yaml
-	sudo cat > /etc/netplan/01-$nic.yaml <<EOF
+	rm -f /etc/netplan/*.yaml
+	cat > /etc/netplan/01-$nic.yaml <<EOF
 # This is the network config written by 'BS4IT lnxrepo script'
 network:
   ethernets:
@@ -190,10 +185,11 @@ network:
   version: 2
 EOF
 	echo "Applying Network Configuration..."
-	sudo netplan apply
+	netplan apply
 fi
 # removing old hostname from /etc/hosts
-sudo sed -i "/$hostname/d" /etc/hosts > /dev/null
-echo -e "${YELLOW}Done!${NC}"
+sed -i "/$hostname/d" /etc/hosts > /dev/null
+echo -e "${WHITE}Wait...${NC}"
+sleep 4
+echo -e "Done!"
 sleep 2
-exit 0

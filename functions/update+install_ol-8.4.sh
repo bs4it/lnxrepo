@@ -1,4 +1,5 @@
 #!/bin/bash
+# 2022 - Fernando Della Torre @ BS4IT
 echo "OL 8.4"
 echo "Atualizando S.O."
 sleep 1

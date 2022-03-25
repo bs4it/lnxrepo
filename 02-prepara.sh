@@ -1,4 +1,5 @@
 #!/bin/bash
+# 2022 - Fernando Della Torre @ BS4IT
 clear
 echo " "
 echo -e "\e[32mVEEAM LINUX REPOSITORY SCRIPT - BS4IT\e[39m"
@@ -110,38 +111,49 @@ mkdir -p $mountpoint
 chown -R $username:$username $mountpoint
 chmod -R 700 $mountpoint
 sleep 1
-
-
+fqdn=$(hostname -f)
 echo -e "\e[32m###################################################################"
 echo -e "Acesse http://`ifconfig | grep inet | grep -v inet6 | grep -v 127.0.0.1 | sed -e 's/^[[:space:]]*//' | cut -d " " -f 2`:4080,"
 echo -e "Para ter acesso as senhas geradas"
 echo -e ""
 echo -e "Ao concluir retorne a esta tela, digite OK e pressione ENTER."
 echo -e "###################################################################\e[39m"
-echo '<html><head><meta http-equiv="Content-Type" content="text/html; charset=utf-8"><title>Dados de acesso ao repositorio.</title></head>' >index.html
-echo "<body>" >> index.html
-echo '<font face="Arial, Helvetica, sans-serif">' >> index.html
-echo "<h1><font color='#FF0000'>Dados de acesso ao repositorio:</font></h1>" >> index.html
-echo "<h3>Dados para ingresso deste servidor ao console Veeam:</b>.</h3>" >> index.html
-echo "<p>" >> index.html
-echo "<b>Hostname:</b> `hostname -f`<br>" >> index.html 
-echo "<b>Username:</b> $username<br>" >> index.html 
-echo "<b>Password:</b> $passwd<br>" >> index.html
-echo "<b>Porta SSH:</b>$ssh_port<br>" >> index.html
-echo "<pre>" >> index.html
-echo "</pre>" >> index.html
-echo "</p>" >> index.html
-echo "<h3>Dados para administração remota com chave SSH e passphrase padrão. A senha abaixo deve ser usada para sudo</h3>" >> index.html
-echo "<p>" >> index.html
-echo "<b>Username:</b> $adminuser<br>" >> index.html 
-echo "<b>Password:</b>$adminpasswd<br>" >> index.html
-echo "<b>Porta SSH:</b>$ssh_port<br>" >> index.html
-echo "</font>" >> index.html
-echo "</body>" >> index.html
-echo "</html>" >> index.html
+cat > index.html <<EOF
+<html><head><meta http-equiv="Content-Type" content="text/html; charset=utf-8"><title>Dados de acesso ao repositorio.</title></head>'
+<body>"
+<font face="Arial, Helvetica, sans-serif">'
+<h1><font color='#FF0000'>Dados de acesso ao repositorio:</font></h1>"
+<h3>Dados para ingresso deste servidor ao console Veeam:</b>.</h3>"
+<p>"
+<b>Hostname:</b> $fqdn<br>" 
+<b>Username:</b> $username<br>" 
+<b>Password:</b> $passwd<br>"
+<b>Porta SSH:</b>$ssh_port<br>"
+<pre>"
+</pre>"
+</p>"
+<h3>Dados para administração remota com chave SSH e passphrase padrão. A senha abaixo deve ser usada para sudo</h3>"
+<p>"
+<b>Username:</b> $adminuser<br>" 
+<b>Password:</b>$adminpasswd<br>"
+<b>Porta SSH:</b>$ssh_port<br>"
+</font>"
+</body>"
+</html>"
+EOF
 echo " "
-python3 -m http.server 4080 &> /dev/null &
-wspid=$!
+
+cat > server.json <<EOF
+{
+"Name": "$fqdn",
+"SSHUser": "$username",
+"SSHPassword": "$passwd",
+"SSHPort": "$ssh_port",
+"Description": "Linux Hardened Repository on $fqdn",
+"Path": "$mountpoint"
+}
+EOF
+nohup "bash -c python3 -m http.server 4080 &> /dev/null 2>&1 & wspid=$!;clear; sleep 6; kill -9 $wspid &> /dev/null 2>&1; rm -f index.html server.json" &> /dev/null 2>&1
 while true; do
 read -p "Digite OK e tecle ENTER para prosseguir:" ok
 if [ -z $ok ]
@@ -153,6 +165,7 @@ if [ $ok == "OK" ] || [ $ok == "ok" ]; then
 	echo "Limpando arquivos temporarios..."
 	kill -9 $wspid > /dev/null
 	rm -f index.html
+	rm -f server.json
 	if [ $os_family == "debian" ]; then
 	        ufw delete allow 4080/tcp
 	elif [ $os_family == "redhat" ]; then

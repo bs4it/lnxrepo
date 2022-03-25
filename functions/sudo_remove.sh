@@ -1,4 +1,5 @@
 #!/bin/bash
+# 2022 - Fernando Della Torre @ BS4IT
 sudouser=$1
 if [ $os_family == "debian" ]; then
     echo "Removendo do grupo sudo"

@@ -1,4 +1,5 @@
 #!/bin/bash
+# 2022 - Fernando Della Torre @ BS4IT
 echo "Ubuntu 20.04"
 echo "Atualizando base do APT"
 sleep 1

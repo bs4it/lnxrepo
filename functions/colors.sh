@@ -16,13 +16,3 @@ LPURPLE='\033[1;35m'
 LCYAN='\033[1;36m'
 WHITE='\033[1;37m'
 NC='\033[0m' # No Color
-
-
-
-
-# #!/bin/bash
-# for((i=16; i<256; i++)); do
-#     printf "\e[48;5;${i}m%03d" $i;
-#     printf '\e[0m';
-#     [ ! $((($i - 15) % 6)) -eq 0 ] && printf ' ' || printf '\n'
-# done

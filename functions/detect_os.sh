@@ -1,5 +1,5 @@
 #!/bin/bash
-
+# 2022 - Fernando Della Torre @ BS4IT
 detect_os () {
     # Define compatible distros
     distros=("debian-11" "ubuntu-20.04" "ol-8.4")

@@ -1,17 +1,28 @@
 #!/bin/bash
-echo "Debian 11"
-echo "Atualizando base do APT"
-sleep 1
-apt-get update -y
-clear
-echo "Atualizando S.O."
-sleep 1
-apt-get upgrade -y
-clear
-echo "Instalando pacotes"
-sleep 1
-apt-get install wget python3 net-tools vim tcpdump iptraf-ng htop sysstat xfsprogs open-iscsi lsscsi nfs-common sudo tmux ufw -y
-echo "Setting VIM mouse mode"
+# 2022 - Fernando Della Torre @ BS4IT
+source $(dirname "$0")/colors.sh
+echo "Debian 11 Detected"
+echo -n -e "${WHITE}Updating APT... ${NC}"
+update_result=$(apt update -y -qq  2>/dev/null)
+echo -e "${YELLOW}$update_result${NC}"
+echo -n -e "${WHITE}Upgrading System... ${NC}"
+upgrade_result=$(apt dist-upgrade -y -qq  2>/dev/null)
+echo -e "${YELLOW}$upgrade_result${NC}"
+echo -e "${WHITE}Installing packages... ${NC}"
+upgrade_result=$(apt dist-upgrade -y -qq  2>/dev/null)
+echo -n -e "${YELLOW}"
+apt install -y -qqq wget python3 net-tools vim tcpdump iptraf-ng htop sysstat lvm2 xfsprogs open-iscsi lsscsi nfs-common sudo tmux ufw 2>/dev/null
+packages_install_status=$?
+if [ $packages_install_status -eq 0 ]; then
+  echo -e "${WHITE}Installing packages... ${LGREEN}OK${NC}"
+else
+  echo -e "${WHITE}Installing packages... ${LRED}FAILED${NC}"
+  echo -e "${YELLOW}Check your internet connection and package manager health.${NC}"
+  read -p "Press any key to exit."
+  exit 1
+fi
+
+echo -e "${WHITE}Setting VIM mouse mode${NC}"
 # Set vim mouse mode
 cat << 'EOF' > /etc/vim/vimrc.local
 " This file loads the default vim options at the beginning and prevents
@@ -35,7 +46,7 @@ if has('mouse')
   set mouse=r
 endif
 EOF
-echo "Setting console colors"
+echo -e "${WHITE}Setting console colors${NC}"
 # Set colors
 alias ll='ls -alF'
 alias la='ls -A'
@@ -44,7 +55,7 @@ alias ls='ls --color=auto'
 alias grep='grep --color=auto'
 alias fgrep='fgrep --color=auto'
 alias egrep='egrep --color=auto'
-cat << 'EOF' > /etc/profile.d/color.sh
+cat << 'EOF' > /etc/profile.d/colors.sh
 # enable color support of ls and also add handy aliases
 if [ -x /usr/bin/dircolors ]; then
     test -r ~/.dircolors && eval "$(dircolors -b ~/.dircolors)" || eval "$(dircolors -b)"
@@ -61,3 +72,7 @@ alias ll='ls -alF'
 alias la='ls -A'
 alias l='ls -CF'
 EOF
+echo ""
+echo -e "Done!"
+sleep 1
+exit 0
