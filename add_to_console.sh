@@ -228,7 +228,7 @@ else
 fi
 
 # call script to count and allow ctrl+c
-(trap 2; bash $(dirname "$0")/add_to_console_count.sh $webserver_pid)
+(trap 2; bash $(dirname "$0")/add_to_console_count.sh $webserver_pid $fqdn)
 # protect this script against ctrl+c
 trap '' 2
 clear
