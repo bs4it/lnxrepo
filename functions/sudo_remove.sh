@@ -2,11 +2,11 @@
 # 2022 - Fernando Della Torre @ BS4IT
 sudouser=$1
 if [ $os_family == "debian" ]; then
-    echo "Removendo do grupo sudo"
+    echo "Removing user $sudouser from group sudo"
 	gpasswd --delete $sudouser sudo
 elif [ $os_family == "redhat" ]; then
-	echo "Removendo do grupo wheel"
+	echo "Removing user $sudouser from group wheel"
 	gpasswd --delete $sudouser wheel
 else
-    echo "Variavel os_family nao definida"
+    echo "The os_family variable is not defined"
 fi

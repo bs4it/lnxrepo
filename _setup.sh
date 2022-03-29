@@ -91,7 +91,45 @@ done
 clear
 build_banner "BS4IT - Linux Hardened Repository Setup" "bs4it@2022"
 echo " "
-echo -e "${YELLOW}Step 3 - Setup iSCSI Initiator:${NC}"
+echo -e "${YELLOW}Step 3 - System Hardening:${NC}"
+echo " "
+echo -e "You must run this step at least once."
+echo " "
+read -p "Press ENTER to continue."
+bash $(dirname "$0")/set_harden.sh
+sleep 0.6
+read -p "Press ENTER to continue."
+
+clear
+build_banner "BS4IT - Linux Hardened Repository Setup" "bs4it@2022"
+echo " "
+echo -e "${YELLOW}Step 4 - Setup Users:${NC}"
+echo " "
+echo -e "Do you want to setup users?"
+echo -e "If this is the first time you run this wizard this is a mandatory step"
+echo " "
+accept=""
+while ! [[ $accept = 'Y' || $accept = 'y' || $accept = 'N' || $accept = 'n' ]]
+do
+	echo -n -e "Setup users now? ${YELLOW}(Y/N)${NC}:"
+	read accept
+	case $accept in
+		y|Y)
+			echo ""
+			sleep 0.3
+            bash ./set_users.sh
+			sleep 0.6
+            read -p "Press ENTER to continue."
+			;;
+		n|N)
+			;;
+  	esac
+done
+
+clear
+build_banner "BS4IT - Linux Hardened Repository Setup" "bs4it@2022"
+echo " "
+echo -e "${YELLOW}Step 5 - Setup iSCSI Initiator:${NC}"
 echo " "
 echo -e "Do you want to change iSCSI configuration?"
 echo -e "If you proceed you may disconnect all active iSCSI sessions."
@@ -117,7 +155,7 @@ done
 clear
 build_banner "BS4IT - Linux Hardened Repository Setup" "bs4it@2022"
 echo " "
-echo -e "${YELLOW}Step 4 - Preparing Disk and Filesystem:${NC}"
+echo -e "${YELLOW}Step 6 - Preparing Disk and Filesystem:${NC}"
 echo " "
 echo -e "In this step your disk will be prepared on a LVM setup, formated as XFS and mounted accordingly"
 echo " "
@@ -131,6 +169,31 @@ do
 			echo ""
 			sleep 0.3
             bash ./set_disk.sh
+			sleep 0.6
+            read -p "Press ENTER to continue."
+			;;
+		n|N)
+			;;
+  	esac
+done
+clear
+build_banner "BS4IT - Linux Hardened Repository Setup" "bs4it@2022"
+echo " "
+echo -e "${YELLOW}Step 7 - Add Repository to Veeam B&R Console:${NC}"
+echo " "
+echo -e "In this step you're going to add this repository to Veeam B&R console."
+echo " "
+accept=""
+while ! [[ $accept = 'Y' || $accept = 'y' || $accept = 'N' || $accept = 'n' ]]
+do
+	echo -n -e "Do you want to add this repository to VB&R now? ${YELLOW}(Y/N)${NC}:"
+	read accept
+	case $accept in
+		y|Y)
+			echo ""
+			sleep 0.3
+            bash ./add_to_console.sh
+			echo "The wizard is complete!"
 			sleep 0.6
             read -p "Press ENTER to continue."
 			;;

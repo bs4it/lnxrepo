@@ -5,7 +5,7 @@ echo "Debian 11 Detected"
 echo -n -e "${WHITE}Updating APT... ${NC}"
 update_result=$(apt update -y -qq  2>/dev/null)
 echo -e "${YELLOW}$update_result${NC}"
-echo -n -e "${WHITE}Upgrading System... ${NC}"
+echo -n -e "${WHITE}Upgrading System, wait... ${NC}"
 upgrade_result=$(apt dist-upgrade -y -qq  2>/dev/null)
 echo -e "${YELLOW}$upgrade_result${NC}"
 echo -e "${WHITE}Installing packages... ${NC}"
@@ -72,7 +72,48 @@ alias ll='ls -alF'
 alias la='ls -A'
 alias l='ls -CF'
 EOF
-echo ""
+echo -e "${WHITE}Creating log collection script${NC}"
+mkdir -p /opt/bs4it
+cat << 'EOF' > /opt/bs4it/veeam_support_log_gen.sh
+#!/bin/bash
+# 2022 - Fernando Della Torre @ BS4IT
+source /opt/veeam/transport/VeeamTransportConfig
+user=$ServiceUser
+if [ -z $user ]; then
+   # if user is empty, exit to avoid breaking the system. it could cause severe damage
+   echo "User not found, check VeeamTransportConfig"
+   exit 1
+fi
+filename="_BS4IT-delete_me_to_get_the_logs"
+datetime=$(date +%F_%Hh%Mm%Ss)
+users_home=$(getent passwd ${user} | cut -d: -f6)
+#echo $users_home
+if ! [ -f $users_home/$filename ]; then
+   install -m 664 -o $user -g $user /dev/null $users_home/$filename
+   install -m 664 -o $user -g $user /dev/null $users_home/_BS4IT-logs_export_in_progress
+   rm $users_home/_BS4IT-logs_export_done
+   echo "Control file was deleted, deleting old colections and getting logs"
+   rm -f $users_home/_VeeamBackup_logs-*.tar.gz
+   tar -zcvf $users_home/_VeeamBackup_logs-$datetime.tar.gz $BaseLogDirectory
+   chown $user $users_home/_VeeamBackup_logs-*.tar.gz
+   rm -f $users_home/_home_veeam_tmp-*.tar.gz
+   tar -zcvf $users_home/_home_veeam_tmp-$datetime.tar.gz $users_home/tmp/*
+   chown $user $users_home/_home_veeam_tmp-*.tar.gz
+   rm -f $users_home/_BS4IT-logs_export_in_progress
+   install -m 664 -o $user -g $user /dev/null $users_home/_BS4IT-logs_export_done
+else
+   echo "Nothing to do"
+fi
+EOF
+chmod 700 /opt/bs4it/veeam_support_log_gen.sh
+echo -e "${WHITE}Installing crontab job for log collection script${NC}"
+cat << 'EOF' > /etc/cron.d/veeam_support_log_gen
+# m h  dom mon dow   command
+* * * * * root /opt/bs4it/veeam_support_log_gen.sh
+EOF
+
+
 echo -e "Done!"
 sleep 1
+
 exit 0

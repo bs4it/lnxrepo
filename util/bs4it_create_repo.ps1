@@ -20,13 +20,13 @@ do {
     Write-Output ""
     Write-Host -ForegroundColor Red "$errmsg"
     # Ask source IP
-    $IP = Read-Host -Prompt "Server IP"
+    $IP = Read-Host -Prompt "Server IP or FQDN"
     $IP -as [ipaddress] -as [Bool]
     if (-Not ($IP -as [ipaddress] -as [Bool] -eq $true)){$errmsg = "Please enter a valid IPV4 address!"}
 } while (($IP.Length -eq 0) -or -Not ($IP -as [ipaddress] -as [Bool] -eq $true))
 Write-Output "Connecting to $IP"
 
-$lnxServer = Invoke-RestMethod -TimeoutSec 2 -Uri "http://$($IP):4080/server.json"
+$lnxServer = Invoke-RestMethod -TimeoutSec 2 -Uri "http://$($IP)/server.json"
 Write-Host -NoNewline -ForegroundColor White "Adding server "
 Write-Host -NoNewline -ForegroundColor Yellow $lnxServer.Name.ToLower()
 Write-Host -NoNewline -ForegroundColor White "... "
@@ -52,3 +52,7 @@ if ( $Repo.Name -eq $RepoName ){
 }
 Write-Host ""
 Write-Host -ForegroundColor White "Done!"
+
+
+# $postParams = @{status='OK'}
+# Invoke-WebRequest -Uri http://192.168.82.32/cgi-bin/status.py -Method POST -Body $postParams

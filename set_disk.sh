@@ -5,7 +5,22 @@ mountpointdefault="/backup"
 vg_name_default="vg_backup"
 lv_name_default="lv_backup"
 source $(dirname "$0")/functions/colors.sh
+source $(dirname "$0")/functions/get_users.sh
 source $(dirname "$0")/functions/build_banner.sh
+if [ -z $serviceuser ]; then
+	clear
+	build_banner "DISK CONFIGURATION" "bs4it@2022" 41
+	echo " "
+	echo -e "${YELLOW}ATTENTION!${NC}"
+	echo ""
+	echo -e "${WHITE}Unable to find service user.${NC}"	
+	echo -e "${WHITE}Did you create users a few steps back?${NC}"
+	echo ""
+	echo -e "${WHITE}Quitting...${NC}"
+	read -p "Press ENTER to quit."
+	exit 1
+fi
+
 clear
 build_banner "DISK CONFIGURATION" "bs4it@2022"
 echo " "
@@ -98,7 +113,7 @@ if [ $result != 0 ]; then
 fi
 echo -e "${LGREEN}OK${NC}"
 sleep 0.3
-echo -n -e "${WHITE}Creating Physical Volume: ${NC}"
+echo -n -e "${WHITE}Creating Physical Volume on ${YELLOW}$blkdevice${WHITE}: ${NC}"
 pvcreate /dev/$blkdevice 1> /dev/null
 result=$?
 sleep 0.3
@@ -114,7 +129,7 @@ read -p "Enter the Volume Group Name (vg_backup):" vg_name
 	then
 	        vg_name=$vg_name_default
 	fi
-echo -n -e "${WHITE}Creating Volume Group $vg_name: ${NC}"
+echo -n -e "${WHITE}Creating Volume Group ${YELLOW}$vg_name${WHITE}: ${NC}"
 vgcreate $vg_name /dev/$blkdevice 1> /dev/null
 result=$?
 sleep 0.3
@@ -130,7 +145,7 @@ read -p "Enter the Logical Volume Name (lv_backup):" lv_name
 	then
 	        lv_name=$lv_name_default
 	fi
-echo -n -e "${WHITE}Creating Logical Volume $lv_name using all available space: ${NC}"
+echo -n -e "${WHITE}Creating Logical Volume ${YELLOW}$lv_name${WHITE} using all available space: ${NC}"
 lvcreate -l 100%FREE -n $lv_name $vg_name 1> /dev/null
 result=$?
 sleep 0.3
@@ -164,7 +179,7 @@ if [ $fstabmount = 0 ]; then
 	then
 	    mountpoint=$mountpointdefault
 	fi
-	echo -n -e "${WHITE}Creating mount point $mountpoint: ${NC}"
+	echo -n -e "${WHITE}Creating mount point ${YELLOW}$mountpoint${WHITE}: ${NC}"
 	mkdir -p $mountpoint
 	sleep 0.3
 	echo -e "${LGREEN}OK${NC}"
@@ -193,6 +208,10 @@ else
 	echo -e "${WHITE}New volume successfully mounted on ${YELLOW}$mountpoint.${NC}"
 fi
 sleep 0.3
+echo -n -e "${WHITE}Setting ${YELLOW}$mountpoint${WHITE} ownership an permissions to service user ${YELLOW}$serviceuser${WHITE}: ${NC}"
+chown -R $serviceuser:$serviceuser $mountpoint
+chmod -R 700 $mountpoint
+echo -e "${LGREEN}OK${NC}"
 echo " "
 echo -e "Done!"
 sleep 1

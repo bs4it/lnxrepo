@@ -30,7 +30,7 @@ do
          echo " "
          echo -e "${YELLOW}Setting initiator name:${NC}"
          echo " "
-         myhostname=`hostname -s`
+         myhostname=$(hostname -s)
          initiatornamedefault="iqn.2014-04.br.com.bs4it:$myhostname"
          echo -e "${WHITE}Enter new IQN for this initiator or accept the default:${NC}"
          echo -n -e "($initiatornamedefault):"

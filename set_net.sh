@@ -57,7 +57,7 @@ echo ""
 nic_selection=0
 while [[ $nic_selection = "" || $nic_selection -le 0  || $nic_selection -gt $count ]]
 do
-	echo -n -e "Select NIC by number:"
+	echo -n -e "Select NIC by number: "
 	read nic_selection
 	if [[ $nic_selection -le 0  || $nic_selection -gt $count ]]; then
 		echo "Selection out of range."

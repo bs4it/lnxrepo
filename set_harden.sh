@@ -1,0 +1,137 @@
+#!/bin/bash
+# 2022 - Fernando Della Torre @ BS4IT
+# Variables
+ssh_port=$(($RANDOM+11000))
+
+# Functions
+source $(dirname "$0")/functions/get_users.sh
+source $(dirname "$0")/functions/colors.sh
+source $(dirname "$0")/functions/build_banner.sh
+source $(dirname "$0")/functions/detect_os.sh
+
+clear
+detect_os
+#os="debian-11"
+# Quit if not running suported O.S.
+if ! [[ $os == "debian-11" || $os == "ubuntu-20.04" ]]; then
+	echo -e "${LRED}This script does not support your O.S.${NC}"
+	echo -e "${LWHITE}You are running ${YELLOW}$os${NC}."
+	echo ""
+	exit 0
+fi
+clear
+build_banner "SYSTEM HARDENING CONFIGURATION" "bs4it@2022"
+echo " "
+echo -e "${YELLOW}General environment hardening settings${NC}"
+echo ""
+echo -e "${WHITE}The next steps are going to set SSH server and firewall.${NC}"
+echo -e "${YELLOW}THIS IS MANDATORY at least one time.${NC}"
+echo -e "${WHITE}If you already ran this step once, it's ok to skip it now.${NC}"
+
+echo -e "${WHITE}You may loose SSH connection depending on your settings.${NC}"
+echo ""
+accept=""
+while ! [[ $accept = 'Y' || $accept = 'y' || $accept = 'N' || $accept = 'n' ]]
+do
+	echo -n -e "Do you really want to go ahead? ${YELLOW}(Y/N)${NC}:"
+	read accept
+	case $accept in
+		y|Y)
+			echo ""
+			;;
+		n|N)
+			echo "Quitting, bye!"
+			exit 0
+			;;
+  	esac
+done
+clear
+build_banner "SYSTEM HARDENING CONFIGURATION" "bs4it@2022"
+echo " "
+echo -e "${YELLOW}The following is about to happen:${NC}"
+echo ""
+sleep 0.3
+echo -e "${WHITE}Set SSH server to use alternative port ${YELLOW}$ssh_port${NC}"
+echo -e "${WHITE}Set SSH root login to ${YELLOW}disabled${NC}"
+echo -e "${WHITE}Set SSH password authentication to ${YELLOW}disabled${NC}"
+echo -e "${WHITE}Set SSH to allow only one user to login: ${YELLOW}$adminuser${NC}"
+echo -e "${WHITE}Set Firewall rules accordingly: ${YELLOW}$ssh_port${NC}"
+echo -e "${WHITE}Restart SSH service${NC}"
+sleep 0.2
+echo ""
+accept=""
+while ! [[ $accept = 'Y' || $accept = 'y' || $accept = 'N' || $accept = 'n' ]]
+do
+	echo -n -e "Is it OK to commit actions? ${YELLOW}(Y/N)${NC}:"
+	read accept
+	case $accept in
+		y|Y)
+			echo ""
+			;;
+		n|N)
+			echo "Quitting, bye!"
+			exit 0
+			;;
+  	esac
+done
+
+clear
+build_banner "SYSTEM HARDENING CONFIGURATION" "bs4it@2022"
+echo " "
+echo -e "${YELLOW}Applying settings...${NC}"
+echo ""
+sleep 0.3
+echo -e -n "${WHITE}Setting SSH server port to ${YELLOW}$ssh_port${NC} "
+# Replaces any port on sshd_config to the defined port
+sed -i "/Port /c\Port $ssh_port" /etc/ssh/sshd_config
+sleep 0.3
+echo -e "${LGREEN}OK"${NC}
+sleep 0.3
+echo -e -n "${WHITE}Setting SSH root login to ${YELLOW}disabled${NC} "
+# Disables SSH root login
+sed -i "s/^PermitRootLogin.*/PermitRootLogin no/" /etc/ssh/sshd_config
+sed -i "s/^#PermitRootLogin.*/PermitRootLogin no/" /etc/ssh/sshd_config
+sleep 0.3
+echo -e "${LGREEN}OK"${NC}
+echo -e -n "${WHITE}Setting SSH password authentication to ${YELLOW}disabled${NC} "
+# Disables SSH password auth
+#sed -i "/^PasswordAuthentication.*/d" /etc/ssh/sshd_config
+sed -i "s/^PasswordAuthentication.*/PasswordAuthentication no/" /etc/ssh/sshd_config
+sed -i "s/^#PasswordAuthentication.*/PasswordAuthentication no/" /etc/ssh/sshd_config
+sleep 0.3
+echo -e "${LGREEN}OK"${NC}
+echo -e -n "${WHITE}Setting SSH to allow only one user to login: ${YELLOW}$adminuser${NC} "
+# Allows only the remote admin user to login into SSH
+egrep ^AllowUsers /etc/ssh/sshd_config >> /dev/null
+if [ $? != "0" ]; then
+        echo "AllowUsers $adminuser" >> /etc/ssh/sshd_config
+else
+        sed -i "s/^AllowUsers.*/AllowUsers $adminuser/" /etc/ssh/sshd_config
+fi
+sleep 0.3
+echo -e "${LGREEN}OK"${NC}
+echo -e "${WHITE}Setting Firewall rules...${NC} "
+# call external script to setup firewall
+bash $(dirname "$0")/functions/firewall_$os.sh $ssh_port
+sleep 0.3
+echo -e -n "${WHITE}Setting Firewall rules accordingly${NC} "
+echo -e "${LGREEN}OK"${NC}
+echo -e -n "${WHITE}Restarting SSH service${NC} "
+ssh_status=""
+if [ $os_family == "debian" ]; then
+	systemctl restart ssh
+	ssh_status=$?
+else
+	systemctl restart sshd
+	ssh_status=$?
+fi
+if [ $ssh_status -eq 0 ]; then
+	echo -e "${LGREEN}OK"${NC}
+else
+	echo -e "${LRED}ERROR"${NC}
+	echo -e "${YELLOW}Something went wrong while restarting SSH. Please check the sshd_config file manually"${NC}
+	exit 1
+fi
+echo ""
+echo -e "Done!"
+sleep 1

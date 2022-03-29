@@ -1,0 +1,508 @@
+#!/bin/bash
+# 2022 - Fernando Della Torre @ BS4IT
+# Variables
+localuser="localmaint"
+adminuserdefault="bs4it"
+adminuserkey="ssh-ed25519 AAAAC3NzaC1lZDI1NTE5AAAAIFb+0VowllRHoxIWZdRPPf8tTxd2XueqTOJOn72bxuUv"
+serviceuserdefault="veeam"
+
+source $(dirname "$0")/functions/colors.sh
+source $(dirname "$0")/functions/build_banner.sh
+source $(dirname "$0")/functions/detect_os.sh
+clear
+detect_os
+#os="debian-11"
+# Quit if not running suported O.S.
+if ! [[ $os == "debian-11" || $os == "ubuntu-20.04" ]]; then
+	echo -e "${LRED}This script does not support your O.S.${NC}"
+	echo -e "${LWHITE}You are running ${YELLOW}$os${NC}."
+	echo ""
+	exit 0
+fi
+build_banner "SETTING UP USERS" "bs4it@2022"
+echo " "
+echo -e "${YELLOW}Creating users or setting passwords for existing users${NC}"
+echo ""
+echo -e "${WHITE}The next steps are going to create users for management and service purposes.${NC}"
+echo -e "${WHITE}If any user already exists its password will be reset.${NC}"
+echo ""
+echo -e "${WHITE}3 users are needed:${NC}"
+echo ""
+echo -e "${WHITE}1 user with local only access for maintenance: ($localuser)${NC}"
+echo -e "${WHITE}1 user with hardened remote access for maintenance: (defaults to $adminuserdefault)${NC}"
+echo -e "${WHITE}1 service user meant to run Veeam's processes: (defaults to $serviceuserdefault)${NC}"
+echo ""
+accept=""
+while ! [[ $accept = 'Y' || $accept = 'y' || $accept = 'N' || $accept = 'n' ]]
+do
+	echo -n -e "Do you really want to go ahead? ${YELLOW}(Y/N)${NC}:"
+	read accept
+	case $accept in
+		y|Y)
+			echo ""
+			;;
+		n|N)
+			echo "Quitting, bye!"
+			exit 0
+			;;
+  	esac
+done
+clear
+build_banner "SETTING UP USERS" "bs4it@2022"
+echo " "
+echo -e "${YELLOW}Enter the required information or press ENTER to accept the defaults:${NC}"
+echo ""
+echo -e -n "${WHITE}Remote administration username ($adminuserdefault): ${NC}"
+read adminuser
+if [ -z $adminuser ]
+then
+        adminuser=$adminuserdefault
+fi
+sleep 0.3
+
+echo -e -n "${WHITE}Service account username ($serviceuserdefault): ${NC}"
+read serviceuser
+if [ -z $serviceuser ]
+then
+        serviceuser=$serviceuserdefault
+fi
+sleep 0.3
+
+clear
+build_banner "SETTING UP USERS" "bs4it@2022"
+echo " "
+echo -e "${YELLOW}The following is about to happen:${NC}"
+echo ""
+echo -e "${WHITE}Create local administration user ${YELLOW}$localuser${NC}."
+echo -e "${WHITE}Create remote administration user ${YELLOW}$adminuser${NC}."
+echo -e "${WHITE}Create service account user ${YELLOW}$serviceuser${NC}."
+sleep 0.2
+echo ""
+accept=""
+while ! [[ $accept = 'Y' || $accept = 'y' || $accept = 'N' || $accept = 'n' ]]
+do
+	echo -n -e "Is it OK to commit actions? ${YELLOW}(Y/N)${NC}:"
+	read accept
+	case $accept in
+		y|Y)
+			echo ""
+			;;
+		n|N)
+			echo "Quitting, bye!"
+			exit 0
+			;;
+  	esac
+done
+
+#Creating local user
+echo -e -n "Creating local admin user ${WHITE}$localuser${NC}... "
+if id -u "$localuser" >/dev/null 2>&1; then
+    echo -e "${YELLOW}User already exists, setting password${NC}"
+	usermod -s /bin/bash -c "Local admin user" $localuser
+else
+	useradd -s /bin/bash -c "Local admin user" -m $localuser
+	localuser_status=$?
+	if [ $localuser_status != 0 ]; then
+		echo ""
+    	echo -e "${LRED}Unable to create user - error $result${NC}"
+		echo -e "Quitting."
+		sleep 3
+		exit 1
+	else
+		echo -e "${LGREEN}OK${NC}"
+	fi
+fi
+source $(dirname "$0")/functions/sudo_add.sh localmaint
+localpasswd=$(echo SnU1dTZoeGlAJTIwMjEK| base64 -d)
+echo "localmaint:$localpasswd" | chpasswd
+localpasswd=""
+
+# create remote admin with sudo powers
+echo -e -n "Creating remote admin user ${WHITE}$adminuser${NC}... "
+if id -u "$adminuser" >/dev/null 2>&1; then
+    echo -e "${YELLOW}User already exists, setting password${NC}"
+	usermod -s /bin/bash -c "Remote admin user" $adminuser
+else
+	useradd -s /bin/bash -c "Remote admin user" -m $adminuser
+	adminuser_status=$?
+	if [ $adminuser_status != 0 ]; then
+		echo ""
+    	echo -e "${LRED}Unable to create user - error $result${NC}"
+		echo -e "Quitting."
+		sleep 3
+		exit 1
+	else
+		echo -e "${LGREEN}OK${NC}"
+	fi
+fi
+source $(dirname "$0")/functions/sudo_add.sh $adminuser
+#$adminpasswd=`openssl rand -base64 32`
+adminpasswd=$(</dev/urandom tr -dc '1234567890!@#$%qwertQWERTyuiopYUIOPasdfgASDFGhjklHJKLzxcvbZXCVBNMnm' | head -c48; echo "")
+echo "$adminuser:$adminpasswd" | chpasswd
+su -l $adminuser -c "mkdir -p ~/.ssh && chmod 700 ~/.ssh && touch ~/.ssh/authorized_keys && chmod 600 ~/.ssh/authorized_keys && echo $adminuserkey >> ~/.ssh/authorized_keys"
+
+# create service account
+echo -e -n "Creating service user ${WHITE}$serviceuser${NC}... "
+if id -u "$serviceuser" >/dev/null 2>&1; then
+    echo -e "${YELLOW}User already exists, setting password${NC}"
+	usermod -s /sbin/nologin -c "Veeam service user" $serviceuser
+else
+	useradd -s /sbin/nologin -r -c "Veeam service user" -m $serviceuser
+	serviceuser_status=$?
+	if [ $serviceuser_status != 0 ]; then
+		echo ""
+    	echo -e "${LRED}Unable to create user - error $result${NC}"
+		echo -e "Quitting."
+		sleep 3
+		exit 1
+	else
+		echo -e "${LGREEN}OK${NC}"
+	fi
+fi
+#passwd=`openssl rand -base64 32`
+passwd=$(</dev/urandom tr -dc '1234567890!@#$%qwertQWERTyuiopYUIOPasdfgASDFGhjklHJKLzxcvbZXCVBNMnm' | head -c48; echo "")
+echo "$serviceuser:$passwd" | chpasswd
+passwd -l $serviceuser
+echo ""
+sleep 3
+clear
+build_banner "SETTING UP USERS" "bs4it@2022"
+echo " "
+echo -e "${YELLOW}Save admin user data:${NC}"
+echo ""
+sleep 0.2
+echo ""
+accept=""
+ssh_port=$(egrep "^Port" /etc/ssh/sshd_config | cut -d " " -f 2)
+fqdn=$(hostname -f)
+# build content.html
+echo -e "Building web content..."
+cat > /tmp/content.html <<EOF
+<!DOCTYPE html>
+<html>
+   <head>
+      <meta http-equiv="Content-Type" content="text/html; charset=utf-8">
+      <title>Dados de acesso ao repositorio.</title>
+      <style>
+         div.ex2 {
+            max-width: 500px;
+            #margin: auto;
+            #border: 3px solid #73AD21;
+         }
+      </style>
+   </head>
+<body>
+<div class="ex2">
+<font face="sans-serif">
+<h3><font color='#B22222'>Repository access info</font></h3>
+<hr>
+<font color='#000000'>
+The credential below is meant for sudo access.<br>
+You won't be able to login without a valid key.
+<p>
+    <table border="0">
+        <tr>
+            <th>Hostname:</th>
+            <td>$fqdn</td>
+        </tr>
+        <tr>
+            <th>Username:</th>
+            <td>$adminuser</td>
+        </tr>
+        <tr>
+            <th>Password:</th>
+            <td>$adminpasswd</td>
+        </tr>
+        <tr>
+            <th>SSH Port:</th>
+            <td>$ssh_port</td>
+        </tr>
+    </table>
+</p>
+Save it in a safe place.
+</font>
+</div>
+</body>
+</html>
+EOF
+# Build index.html
+cat > /tmp/index.html <<EOF
+<html>
+   <head>
+      <meta http-equiv="Content-Type" content="text/html; charset=utf-8">
+      <title>BS4IT - Repository access info</title>
+      <style>
+         .btn {
+            background-color: DodgerBlue;
+            border: none;
+            color: white;
+            padding: 6px 15px;
+            cursor: pointer;
+            font-size: 16px;
+         }
+
+         /* Darker background on mouse-over */
+         .btn:hover {
+            background-color: RoyalBlue;
+         }
+	 .footer {
+            position: fixed;
+            left: 0;
+            bottom: 0;
+            width: 100%;
+            background-color: FireBrick;
+            color: white;
+	    font-family: sans-serif;
+	    font-size: 12px;
+            text-align: center;
+         }
+      </style>
+   </head>
+<body>
+<script>
+function includeHTML() {
+  var z, i, elmnt, file, xhttp;
+  /* Loop through a collection of all HTML elements: */
+  z = document.getElementsByTagName("*");
+  for (i = 0; i < z.length; i++) {
+    elmnt = z[i];
+    /*search for elements with a certain atrribute:*/
+    file = elmnt.getAttribute("w3-include-html");
+    if (file) {
+      /* Make an HTTP request using the attribute value as the file name: */
+      xhttp = new XMLHttpRequest();
+      xhttp.onreadystatechange = function() {
+        if (this.readyState == 4) {
+          if (this.status == 200) {elmnt.innerHTML = this.responseText;}
+          if (this.status == 404) {elmnt.innerHTML = "Page not found.";}
+          /* Remove the attribute, and call this function once more: */
+          elmnt.removeAttribute("w3-include-html");
+          includeHTML();
+        }
+      }
+      xhttp.open("GET", file, true);
+      xhttp.send();
+      /* Exit the function: */
+      return;
+    }
+  }
+}
+</script>
+<div w3-include-html="content.html"></div>
+<br>
+<a href="content.html" download="$fqdn.html">
+   <button class="btn">Download</button>
+</a>
+<hr>
+<iframe src="/cgi-bin/getData.py" width="100%" height="65%" style="border:0px;">
+</iframe>
+<div class="footer">
+   <footer>bs4it@2022</footer>
+</div>
+<script>
+   includeHTML();
+</script> 
+</body>
+</html>
+EOF
+# Build getData.py
+mkdir -p /tmp/cgi-bin
+cat > /tmp/cgi-bin/getData.py <<EOF
+#!/usr/bin/env python3
+# Import modules for CGI handling
+import cgi, cgitb
+# Create instance of FieldStorage
+form = cgi.FieldStorage()
+# Get data from fields
+first_name = form.getvalue('first_name')
+last_name  = form.getvalue('last_name')
+ssh_keys = form.getvalue('ssh_keys')
+
+
+#f = open("./auth_keys.txt", "w")
+#f.write(ssh_keys)
+#f.close()
+print("Content-Type: text/html\n")
+#print("Content-type:text/html")
+
+print("""
+<html>
+   <head>
+      <meta http-equiv="Content-Type" content="text/html; charset=utf-8">
+      <title>Public Key Form</title>
+      <style>
+         textarea {
+            width: 98%;
+            height: 300px;
+            padding: 6px 10px;
+            box-sizing: border-box;
+            border: 2px solid #ccc;
+            border-radius: 4px;
+            background-color: #f8f8f8;
+            font-size: 14px;
+            resize: none;
+         }
+         .btn {
+            background-color: DodgerBlue;
+            border: none;
+            color: white;
+            padding: 6px 15px;
+            cursor: pointer;
+            font-size: 16px;
+         }
+
+         /* Darker background on mouse-over */
+         .btn:hover {
+            background-color: RoyalBlue;
+         }
+         
+         #hideMe {
+            -moz-animation: cssAnimation 0s ease-in 3s forwards;
+            /* Firefox */
+            -webkit-animation: cssAnimation 0s ease-in 3s forwards;
+            /* Safari and Chrome */
+            -o-animation: cssAnimation 0s ease-in 3s forwards;
+            /* Opera */
+            animation: cssAnimation 0s ease-in 3s forwards;
+            -webkit-animation-fill-mode: forwards;
+            animation-fill-mode: forwards;
+         }
+         @keyframes cssAnimation {
+            to {
+               width:0;
+               height:0;
+               overflow:hidden;
+            }
+         }
+         @-webkit-keyframes cssAnimation {
+            to {
+               width:0;
+               height:0;
+               visibility:hidden;
+            }
+         }
+         div.ex2 {
+            max-width: 500px;
+            #margin: auto;
+            #border: 3px solid #73AD21;
+         }
+      </style>
+   </head>
+   <body>
+      <font face="sans-serif">""")
+try: ssh_keys
+except NameError: ssh_keys = None
+if ssh_keys is None:
+    status = " "
+#    print("Nao definido")
+else:
+    status = "Saved!"
+#    print("Definido")
+    f = open("./auth_keys.txt", "w")
+    f.write(ssh_keys)
+    f.close()
+print("""
+<div class="ex2">
+<h3><font color='#B22222'>SSH Public key management</font></h3>
+<hr>
+</div>
+Paste the SSH public keys you want to be use for remote connection in adition to the default key.<br>
+After saving, you <strong>MUST</strong> go back to the shell to commit the changes and close this temporary web server.
+<p></p>
+<form method="post" action="/cgi-bin/getData.py">
+    <label for="keys">Extra Allowed public keys:</label>
+    <br>
+    <textarea id="keys" name="ssh_keys">""")
+f = open("./auth_keys.txt", "r")
+print(f.read())
+f.close()
+print("""</textarea>
+        <p></p>
+    <span>
+       <input type="submit" value="Save" class="btn">
+    </span>
+    <div id="hideMe" style="background-color: FireBrick; color: white; display: inline-block;">""" + status +"""</div>
+</form>
+""")
+
+print("")
+print("""
+</body>
+</html>
+""")
+EOF
+chmod +x /tmp/cgi-bin/getData.py
+
+# Create auth_keys.txt file and set permissions
+touch /tmp/auth_keys.txt
+chown nobody. /tmp/auth_keys.txt
+
+# Allow HTTP
+echo -e "Setting firewal to allow HTTP..."
+ufw allow http 1>/dev/null
+# Start web server as root
+# Store first PID in a var
+echo -e "Starting web server..."
+webserver_pid=$(cd /tmp; bash -c 'echo $$; (python3 -m http.server --cgi 80 1>/dev/null 2>1 &)')
+# As the process forks twice, update the pid
+webserver_pid=$(($webserver_pid+2))
+echo ""
+echo -e "${WHITE}Please browse to ${YELLOW}http://$(ip a | grep inet | grep -v inet6 | grep -v 127.0.0.1 | xargs | cut -d " " -f 2 | cut -d "/" -f 1)${NC},"
+echo -e "${WHITE}Download access information and add our public keys in order to be able to log as ${YELLOW}$adminuser${NC}."
+echo ""
+echo -e "${WHITE}After downloading the credentials and saving your public keys you MUST come back here to commit the changes${NC}."
+echo ""
+while ! [[ $accept = 'Y' || $accept = 'y' || $accept = 'N' || $accept = 'n' ]]
+do
+	echo -n -e "Did you download the credentials and add your public keys? ${YELLOW}(Y/N)${NC}:"
+	read accept
+	case $accept in
+		y|Y)
+			clear
+			build_banner "SETTING UP USERS" "bs4it@2022"
+			echo " "
+			echo -e "${YELLOW}Finishing setting up users:${NC}"
+			echo ""
+			sleep 0.2
+			echo ""
+			# build content.html
+			echo -e "Stopping web server..."
+			kill -9 $webserver_pid
+			echo -e "Removing firewall rule for HTTP..."
+			ufw --force delete allow http 1>/dev/null
+			echo -e "Writting public keys..."
+			su -l $adminuser -c "mkdir -p ~/.ssh && chmod 700 ~/.ssh && touch ~/.ssh/authorized_keys && chmod 600 ~/.ssh/authorized_keys && echo $adminuserkey > ~/.ssh/authorized_keys && cat /tmp/auth_keys.txt >> ~/.ssh/authorized_keys"
+			echo -e "Cleaning up temporary files..."
+			(rm -f /tmp/auth_keys.txt /tmp/content.html /tmp/index.html /tmp/cgi-bin/getData.py; rmdir /tmp/cgi-bin)
+			# Allows only the remote admin user to login into SSH
+			egrep ^AllowUsers /etc/ssh/sshd_config >> /dev/null
+			if [ $? != "0" ]; then
+					echo "AllowUsers $adminuser" >> /etc/ssh/sshd_config
+			else
+					sed -i "s/^AllowUsers.*/AllowUsers $adminuser/" /etc/ssh/sshd_config
+			fi
+			echo -e -n "Restarting SSH service..."
+			ssh_status=""
+			if [ $os_family == "debian" ]; then
+				systemctl restart ssh
+				ssh_status=$?
+			else
+				systemctl restart sshd
+				ssh_status=$?
+			fi
+			if [ $ssh_status -eq 0 ]; then
+				echo -e "${LGREEN}OK"${NC}
+			else
+				echo -e "${LRED}ERROR"${NC}
+				echo -e "${YELLOW}Something went wrong while restarting SSH. Please check the sshd_config file manually"${NC}
+				exit 1
+			fi
+			;;
+		n|N)
+			echo "Read careffully!"
+			#exit 0
+			;;
+  	esac
+done
+echo -e "Done!"
+sleep 1

@@ -2,11 +2,11 @@
 # 2022 - Fernando Della Torre @ BS4IT
 sudouser=$1
 if [ $os_family == "debian" ]; then
-    echo "Adicionando ao grupo sudo"
+    echo "Adding user $sudouser to group sudo"
 	usermod -a -G sudo $sudouser
 elif [ $os_family == "redhat" ]; then
-	echo "Adicionando ao grupo wheel"
+	echo "Adding user $sudouser to group wheel"
 	usermod -a -G wheel $sudouser
 else
-    echo "Variavel os_family nao definida"
+    echo "The os_family variable is not defined"
 fi
