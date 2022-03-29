@@ -6,6 +6,33 @@ $EnableXFSFastClone = $true
 $EnableBackupImmutability = $true
 $AlignDataBlocks = $true
 $ImmutabilityPeriod = 7
+function Set-UseUnsafeHeaderParsing
+{
+    param(
+        [Parameter(Mandatory,ParameterSetName='Enable')]
+        [switch]$Enable,
+
+        [Parameter(Mandatory,ParameterSetName='Disable')]
+        [switch]$Disable
+    )
+    $ShouldEnable = $PSCmdlet.ParameterSetName -eq 'Enable'
+    $netAssembly = [Reflection.Assembly]::GetAssembly([System.Net.Configuration.SettingsSection])
+    if($netAssembly)
+    {
+        $bindingFlags = [Reflection.BindingFlags] 'Static,GetProperty,NonPublic'
+        $settingsType = $netAssembly.GetType('System.Net.Configuration.SettingsSectionInternal')
+        $instance = $settingsType.InvokeMember('Section', $bindingFlags, $null, $null, @())
+        if($instance)
+        {
+            $bindingFlags = 'NonPublic','Instance'
+            $useUnsafeHeaderParsingField = $settingsType.GetField('useUnsafeHeaderParsing', $bindingFlags)
+            if($useUnsafeHeaderParsingField)
+            {
+              $useUnsafeHeaderParsingField.SetValue($instance, $ShouldEnable)
+            }
+        }
+    }
+}
 
 $ErrorActionPreference = "Stop"
 $errmsg = ""
@@ -32,6 +59,7 @@ $Server = Add-VBRLinux -Name $lnxServer.Name.ToLower() -SSHPort $lnxServer.SSHPo
 if ( $Server.Name -eq $lnxServer.Name.ToLower() ){
     Write-Host -ForegroundColor Green "OK"
     $postParams = @{status='OK'}
+    Set-UseUnsafeHeaderParsing -Enable
     $postResult = Invoke-WebRequest -Uri "http://$($IP)/cgi-bin/status.py" -Method POST -Body $postParams
 } Else {
     Write-Host -ForegroundColor Red "Error"
@@ -52,6 +80,3 @@ if ( $Repo.Name -eq $RepoName ){
 Write-Host ""
 Write-Host -ForegroundColor White "Done!"
 
-
-# $postParams = @{status='OK'}
-# Invoke-WebRequest -Uri http://192.168.82.32/cgi-bin/status.py -Method POST -Body $postParams
