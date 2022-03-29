@@ -22,7 +22,14 @@ else
   exit 1
 fi
 
-echo -e "${WHITE}Setting VIM mouse mode${NC}"
+echo "${WHITE}Copying issue file...${NC}"
+cp $(dirname "$0")/issue /etc/issue
+echo -e "${WHITE}Customising GRUB...${NC}"
+sed -i 's/^GRUB_TIMEOUT=.*/GRUB_TIMEOUT=3/' /etc/default/grub 2>/dev/null
+sed -i 's/^GRUB_DISTRIBUTOR=.*/GRUB_DISTRIBUTOR="BS4IT - Veeam Linux Hardened Repository"/' /etc/default/grub 2>/dev/null
+sed -i 's/^GRUB_CMDLINE_LINUX_DEFAULT=.*/GRUB_CMDLINE_LINUX_DEFAULT=""/' /etc/default/grub 2>/dev/null
+update-grub2
+echo -e "${WHITE}Setting VIM mouse mode...${NC}"
 # Set vim mouse mode
 cat << 'EOF' > /etc/vim/vimrc.local
 " This file loads the default vim options at the beginning and prevents
@@ -46,7 +53,7 @@ if has('mouse')
   set mouse=r
 endif
 EOF
-echo -e "${WHITE}Setting console colors${NC}"
+echo -e "${WHITE}Setting console colors...${NC}"
 # Set colors
 alias ll='ls -alF'
 alias la='ls -A'
@@ -72,7 +79,7 @@ alias ll='ls -alF'
 alias la='ls -A'
 alias l='ls -CF'
 EOF
-echo -e "${WHITE}Creating log collection script${NC}"
+echo -e "${WHITE}Creating log collection script...${NC}"
 mkdir -p /opt/bs4it
 cat << 'EOF' > /opt/bs4it/veeam_support_log_gen.sh
 #!/bin/bash
@@ -106,14 +113,13 @@ else
 fi
 EOF
 chmod 700 /opt/bs4it/veeam_support_log_gen.sh
-echo -e "${WHITE}Installing crontab job for log collection script${NC}"
+echo -e "${WHITE}Installing crontab job for log collection script...${NC}"
 cat << 'EOF' > /etc/cron.d/veeam_support_log_gen
 # m h  dom mon dow   command
 * * * * * root /opt/bs4it/veeam_support_log_gen.sh
 EOF
 
-
 echo -e "Done!"
-sleep 1
+sleep 2
 
 exit 0
