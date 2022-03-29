@@ -202,6 +202,7 @@ EOF
 chmod +x /tmp/cgi-bin/status.py
 # Create status file and set permissions
 touch /tmp/status
+echo -n "WAIT" > /tmp/status
 chown nobody. /tmp/status
 
 # Allow HTTP

@@ -36,8 +36,10 @@ echo ""
 echo -e "You have up to 5 minutes to add this repository to VB&R console."
 echo -e "Once you complete it successfully we'll automaticaly proceed."
 echo -e "You can also cancel this at any time by pressing "'"CTRL+C"'"."
-while [ $secondstowait -gt 0 ]; do
+status="WAIT"
+while [ $secondstowait -gt 0 && $status != "OK" ]; do
    echo -ne "$(convertsecs $secondstowait)\033[0K\r"
+   status=$(cat /tmp/status)
    sleep 1;
    : $((secondstowait--));
 done

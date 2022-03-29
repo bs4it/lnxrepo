@@ -7,10 +7,7 @@ $EnableBackupImmutability = $true
 $AlignDataBlocks = $true
 $ImmutabilityPeriod = 7
 
-
 $ErrorActionPreference = "Stop"
-
-
 $errmsg = ""
 do {
     # Clear Screen
@@ -34,6 +31,8 @@ $Server = Add-VBRLinux -Name $lnxServer.Name.ToLower() -SSHPort $lnxServer.SSHPo
 
 if ( $Server.Name -eq $lnxServer.Name.ToLower() ){
     Write-Host -ForegroundColor Green "OK"
+    $postParams = @{status='OK'}
+    $postResult = Invoke-WebRequest -Uri "http://$($IP)/cgi-bin/status.py" -Method POST -Body $postParams
 } Else {
     Write-Host -ForegroundColor Red "Error"
     Exit
