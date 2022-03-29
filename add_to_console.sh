@@ -226,7 +226,7 @@ else
    sleep 3
    exit 1
 fi
-
+sleep 2
 # call script to count and allow ctrl+c
 (trap 2; bash $(dirname "$0")/add_to_console_count.sh $webserver_pid $fqdn)
 # protect this script against ctrl+c
@@ -237,7 +237,6 @@ echo " "
 echo -e "${YELLOW}Finishing proccess and cleaning up files:${NC}"
 echo ""
 sleep 0.2
-echo ""
 # build content.html
 echo -e "Stopping web server..."
 kill -9 $webserver_pid
@@ -286,5 +285,3 @@ echo ""
 echo "Done!"
 trap 2
 exit 0
-
-

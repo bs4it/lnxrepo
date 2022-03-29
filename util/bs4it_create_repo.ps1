@@ -6,6 +6,8 @@ $EnableXFSFastClone = $true
 $EnableBackupImmutability = $true
 $AlignDataBlocks = $true
 $ImmutabilityPeriod = 7
+
+
 function Set-UseUnsafeHeaderParsing
 {
     param(
@@ -15,17 +17,23 @@ function Set-UseUnsafeHeaderParsing
         [Parameter(Mandatory,ParameterSetName='Disable')]
         [switch]$Disable
     )
+
     $ShouldEnable = $PSCmdlet.ParameterSetName -eq 'Enable'
+
     $netAssembly = [Reflection.Assembly]::GetAssembly([System.Net.Configuration.SettingsSection])
+
     if($netAssembly)
     {
         $bindingFlags = [Reflection.BindingFlags] 'Static,GetProperty,NonPublic'
         $settingsType = $netAssembly.GetType('System.Net.Configuration.SettingsSectionInternal')
+
         $instance = $settingsType.InvokeMember('Section', $bindingFlags, $null, $null, @())
+
         if($instance)
         {
             $bindingFlags = 'NonPublic','Instance'
             $useUnsafeHeaderParsingField = $settingsType.GetField('useUnsafeHeaderParsing', $bindingFlags)
+
             if($useUnsafeHeaderParsingField)
             {
               $useUnsafeHeaderParsingField.SetValue($instance, $ShouldEnable)
@@ -33,6 +41,7 @@ function Set-UseUnsafeHeaderParsing
         }
     }
 }
+
 
 $ErrorActionPreference = "Stop"
 $errmsg = ""
@@ -45,16 +54,21 @@ do {
     Write-Host -ForegroundColor Red "$errmsg"
     # Ask source IP
     $IP = Read-Host -Prompt "Server IP or FQDN"
-    $IP -as [ipaddress] -as [Bool]
     if (-Not ($IP -as [ipaddress] -as [Bool] -eq $true)){$errmsg = "Please enter a valid IPV4 address!"}
 } while (($IP.Length -eq 0) -or -Not ($IP -as [ipaddress] -as [Bool] -eq $true))
 Write-Output "Connecting to $IP"
-
 $lnxServer = Invoke-RestMethod -TimeoutSec 2 -Uri "http://$($IP)/server.json"
-Write-Host -NoNewline -ForegroundColor White "Adding server "
-Write-Host -NoNewline -ForegroundColor Yellow $lnxServer.Name.ToLower()
-Write-Host -NoNewline -ForegroundColor White "... "
-$Server = Add-VBRLinux -Name $lnxServer.Name.ToLower() -SSHPort $lnxServer.SSHPort -SSHUser $lnxServer.SSHUser -SSHPassword $lnxServer.SSHPassword -Description $lnxServer.Description -SSHTempCredentials:$true -SSHElevateToRoot:$true
+$Server = Get-VBRServer -Name $lnxServer.Name.ToLower()
+if ( $Server -eq $null ){
+    Write-Host -NoNewline -ForegroundColor White "Adding server "
+    Write-Host -NoNewline -ForegroundColor Yellow $lnxServer.Name.ToLower()
+    Write-Host -NoNewline -ForegroundColor White "... "
+    $Server = Add-VBRLinux -Name $lnxServer.Name.ToLower() -SSHPort $lnxServer.SSHPort -SSHUser $lnxServer.SSHUser -SSHPassword $lnxServer.SSHPassword -Description $lnxServer.Description -SSHTempCredentials:$true -SSHElevateToRoot:$true
+} Else {
+    Write-Host -NoNewline -ForegroundColor White "Server "
+    Write-Host -NoNewline -ForegroundColor Yellow $lnxServer.Name.ToLower()
+    Write-Host -NoNewline -ForegroundColor White " already on VB&R, skiping. "
+}
 
 if ( $Server.Name -eq $lnxServer.Name.ToLower() ){
     Write-Host -ForegroundColor Green "OK"
@@ -65,7 +79,11 @@ if ( $Server.Name -eq $lnxServer.Name.ToLower() ){
     Write-Host -ForegroundColor Red "Error"
     Exit
 }
-$RepoName = ($lnxServer.Name.Split(".")[0]).ToUpper()
+$RepoNameDefault = ($lnxServer.Name.Split(".")[0]).ToUpper()
+$RepoName = Read-Host -Prompt "Type repository name or ENTER to accept default ($RepoNameDefault) "
+if ( [string]::IsNullOrWhiteSpace($RepoName) ) {
+    $RepoName = $RepoNameDefault
+}
 
 Write-Host -NoNewline -ForegroundColor White "Creating Linux repository "
 Write-Host -NoNewline -ForegroundColor Yellow $RepoName
@@ -79,4 +97,4 @@ if ( $Repo.Name -eq $RepoName ){
 }
 Write-Host ""
 Write-Host -ForegroundColor White "Done!"
-
+Write-Host ""
