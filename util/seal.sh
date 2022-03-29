@@ -8,7 +8,6 @@ sed -i 's/^GRUB_TIMEOUT=.*/GRUB_TIMEOUT=3/' /etc/default/grub 2>/dev/null
 sed -i 's/^GRUB_DISTRIBUTOR=.*/GRUB_DISTRIBUTOR="BS4IT - Veeam Linux Hardened Repository"/' /etc/default/grub 2>/dev/null
 sed -i 's/^GRUB_CMDLINE_LINUX_DEFAULT=.*/GRUB_CMDLINE_LINUX_DEFAULT=""/' /etc/default/grub 2>/dev/null
 update-grub2
-systemctl enable set_net.service
 echo "Deleting log.gz files..."
 find /var/log/ -type f -name "*.gz" -exec rm -f {} \;
 echo "Truncating log files..."
@@ -24,6 +23,7 @@ echo "Cleaning APT cache..."
 apt clean -y
 echo "Enabling network configuration wizard on next boot..."
 cp $(dirname "$0")/set_net.service /etc/systemd/system/
+systemctl enable set_net.service
 echo "Cleaning bash history..."
 bash -c "cat /dev/null > /root/.bash_history && history -c"
 (cat /dev/null > ~/.bash_history; history -c; history -w)
