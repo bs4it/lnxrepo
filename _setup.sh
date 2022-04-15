@@ -4,6 +4,7 @@ source $(dirname "$0")/functions/colors.sh
 source $(dirname "$0")/functions/IPprefix_by_netmask.sh
 source $(dirname "$0")/functions/detect_os.sh
 source $(dirname "$0")/functions/build_banner.sh
+trap '' 2
 clear
 #detect_os
 os="debian-11"
@@ -15,189 +16,84 @@ if ! [[ $os == "debian-11" || $os == "ubuntu-20.04" ]]; then
 	exit 0
 fi
 
-clear
-build_banner "BS4IT - Linux Hardened Repository Setup" "bs4it@2022"
-echo " "
-echo -e "${YELLOW}WELCOME!${NC}" 
-echo "$os detected."
-echo " "
-echo -e "The next steps will help you to setup a Linux Hardened Repository to store your Veeam Backup & Replication data."
-echo ""
-while ! [[ $accept = 'Y' || $accept = 'y' || $accept = 'N' || $accept = 'n' ]]
+# while [[ $nic_selection = "" || $nic_selection -le 0  || $nic_selection -gt $count ]]
+# do
+# 	echo -n -e "Select NIC by number: "
+# 	read nic_selection
+# 	if [[ $nic_selection -le 0  || $nic_selection -gt $count ]]; then
+# 		echo "Selection out of range."
+# 	fi
+# done
+
+
+
+while [[ $selection = "" || $selection -le 0  || $selection -gt $count ]]
+#while ! [[ $accept = 'Y' || $accept = 'y' || $accept = 'N' || $accept = 'n' ]]
 do
-	echo -n -e "Do you want to go ahead? ${YELLOW}(Y/N)${NC}:"
-	read accept
-	case $accept in
-		y|Y)
-			echo ""
-			echo "OK!"
+	clear
+	build_banner "BS4IT - Linux Hardened Repository Setup" "bs4it@2022"
+	echo " "
+	echo -e "${YELLOW}Linux Hardened Repository Setup${NC}" 
+	echo -e "${CYAN}$os detected.${NC}"
+	echo " "
+	echo -e "This set of tools helps you to setup and maintain a Linux Hardened Repository."
+	echo -e "Select to run the Deploy Wizard or the desired standalone feature."
+	echo ""
+	echo -e ""
+	echo -e " ${YELLOW}0${NC} - Deploy Wizard"
+	echo -e " ${YELLOW}1${NC} - Set Network Interface"
+	echo -e " ${YELLOW}2${NC} - Update and Install Packages + OS Customizations"
+	echo -e " ${YELLOW}3${NC} - Harden SSH, Firewall + Install Log Collection Script"
+	echo -e " ${YELLOW}4${NC} - Create Users + Get Credentials"
+	echo -e " ${YELLOW}5${NC} - Setup iSCSI"
+	echo -e " ${YELLOW}6${NC} - Setup Disk, LVM, Filesystem and Mount Point + Permissions"
+	echo -e " ${YELLOW}7${NC} - Add to Veeam backup & Replication Console"
+	echo -e " ${YELLOW}8${NC} - Quit"
+	echo ""
+	echo -n -e "Your selection ${YELLOW}(0)${NC}: "
+	read selection
+	 	if [[ $selection -lt 0  || $selection -gt 8 ]]; then
+ 			echo "Selection out of range."
+			sleep 1
+ 		fi
+	case $selection in
+		0)
+			(trap 2; bash $(dirname "$0")/_wizard.sh)
 			sleep 0.3
 			;;
-		n|N)
+		1)
+			(trap 2; bash $(dirname "$0")/set_net.sh)
+			sleep 0.3
+			;;
+		2)
+			(trap 2; bash $(dirname "$0")/set_updates+install.sh)
+			sleep 0.3
+			;;
+		3)
+			(trap 2; bash $(dirname "$0")/set_harden.sh)
+			sleep 0.3
+			;;
+		4)
+			(trap 2; bash $(dirname "$0")/set_users.sh)
+			sleep 0.3
+			;;
+		5)
+			(trap 2; bash $(dirname "$0")/set_iscsi.sh)
+			sleep 0.3
+			;;
+		6)
+			(trap 2; bash $(dirname "$0")/set_disk.sh)
+			sleep 0.3
+			;;
+		7)
+			(bash $(dirname "$0")/add_to_console.sh)
+			sleep 0.3
+			;;
+		8)
 			echo "Quitting, bye!"
+			trap 2
 			exit 0
 			;;
-  	esac
-done
-clear
-build_banner "BS4IT - Linux Hardened Repository Setup" "bs4it@2022"
-echo " "
-echo -e "${YELLOW}Step 1 - Network Interface Configuration:${NC}"
-echo " "
-echo -e "Do you want to setup network interfaces now? "
-echo -e "You may lose access to this server depending on your settings."
-echo " "
-accept=""
-while ! [[ $accept = 'Y' || $accept = 'y' || $accept = 'N' || $accept = 'n' ]]
-do
-	echo -n -e "Start network wizard now? ${YELLOW}(Y/N)${NC}:"
-	read accept
-	case $accept in
-		y|Y)
-            bash ./set_net.sh
-			sleep 0.6
-            read -p "Press ENTER to continue."
-			;;
-		n|N)
-			;;
-  	esac
-done
-
-clear
-build_banner "BS4IT - Linux Hardened Repository Setup" "bs4it@2022"
-echo " "
-echo -e "${YELLOW}Step 2 - Update system and install packages:${NC}"
-echo " "
-echo -e "Do you want to update the system and install the required packages? "
-echo -e "You need to have your network working to proceed."
-echo " "
-accept=""
-while ! [[ $accept = 'Y' || $accept = 'y' || $accept = 'N' || $accept = 'n' ]]
-do
-	echo -n -e "Apply latest updates and install packages now? ${YELLOW}(Y/N)${NC}:"
-	read accept
-	case $accept in
-		y|Y)
-			echo ""
-			sleep 0.3
-            bash ./functions/update+install_$os.sh
-            read -p "Press ENTER to continue."
-			;;
-		n|N)
-			;;
-  	esac
-done
-
-clear
-build_banner "BS4IT - Linux Hardened Repository Setup" "bs4it@2022"
-echo " "
-echo -e "${YELLOW}Step 3 - System Hardening:${NC}"
-echo " "
-echo -e "You must run this step at least once."
-echo " "
-read -p "Press ENTER to continue."
-bash $(dirname "$0")/set_harden.sh
-sleep 0.6
-read -p "Press ENTER to continue."
-
-clear
-build_banner "BS4IT - Linux Hardened Repository Setup" "bs4it@2022"
-echo " "
-echo -e "${YELLOW}Step 4 - Setup Users:${NC}"
-echo " "
-echo -e "Do you want to setup users?"
-echo -e "If this is the first time you run this wizard this is a mandatory step"
-echo " "
-accept=""
-while ! [[ $accept = 'Y' || $accept = 'y' || $accept = 'N' || $accept = 'n' ]]
-do
-	echo -n -e "Setup users now? ${YELLOW}(Y/N)${NC}:"
-	read accept
-	case $accept in
-		y|Y)
-			echo ""
-			sleep 0.3
-            bash ./set_users.sh
-			sleep 0.6
-            read -p "Press ENTER to continue."
-			;;
-		n|N)
-			;;
-  	esac
-done
-
-clear
-build_banner "BS4IT - Linux Hardened Repository Setup" "bs4it@2022"
-echo " "
-echo -e "${YELLOW}Step 5 - Setup iSCSI Initiator:${NC}"
-echo " "
-echo -e "Do you want to change iSCSI configuration?"
-echo -e "If you proceed you may disconnect all active iSCSI sessions."
-echo " "
-accept=""
-while ! [[ $accept = 'Y' || $accept = 'y' || $accept = 'N' || $accept = 'n' ]]
-do
-	echo -n -e "Start iSCSI initiator wizard now? ${YELLOW}(Y/N)${NC}:"
-	read accept
-	case $accept in
-		y|Y)
-			echo ""
-			sleep 0.3
-            bash ./set_iscsi.sh
-			sleep 0.6
-            read -p "Press ENTER to continue."
-			;;
-		n|N)
-			;;
-  	esac
-done
-
-clear
-build_banner "BS4IT - Linux Hardened Repository Setup" "bs4it@2022"
-echo " "
-echo -e "${YELLOW}Step 6 - Preparing Disk and Filesystem:${NC}"
-echo " "
-echo -e "In this step your disk will be prepared on a LVM setup, formated as XFS and mounted accordingly"
-echo " "
-accept=""
-while ! [[ $accept = 'Y' || $accept = 'y' || $accept = 'N' || $accept = 'n' ]]
-do
-	echo -n -e "Start disk setup wizard now? ${YELLOW}(Y/N)${NC}:"
-	read accept
-	case $accept in
-		y|Y)
-			echo ""
-			sleep 0.3
-            bash ./set_disk.sh
-			sleep 0.6
-            read -p "Press ENTER to continue."
-			;;
-		n|N)
-			;;
-  	esac
-done
-clear
-build_banner "BS4IT - Linux Hardened Repository Setup" "bs4it@2022"
-echo " "
-echo -e "${YELLOW}Step 7 - Add Repository to Veeam B&R Console:${NC}"
-echo " "
-echo -e "In this step you're going to add this repository to Veeam B&R console."
-echo " "
-accept=""
-while ! [[ $accept = 'Y' || $accept = 'y' || $accept = 'N' || $accept = 'n' ]]
-do
-	echo -n -e "Do you want to add this repository to VB&R now? ${YELLOW}(Y/N)${NC}:"
-	read accept
-	case $accept in
-		y|Y)
-			echo ""
-			sleep 0.3
-            bash ./add_to_console.sh
-			echo "The wizard is complete!"
-			sleep 0.6
-            read -p "Press ENTER to continue."
-			;;
-		n|N)
-			;;
+		
   	esac
 done

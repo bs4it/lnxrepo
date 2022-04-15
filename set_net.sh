@@ -12,10 +12,10 @@ if ! [[ $os == "debian-11" || $os == "ubuntu-20.04" ]]; then
 	echo -e "${LRED}This script does not support your O.S.${NC}"
 	echo -e "${LWHITE}You are running ${YELLOW}$os${NC}."
 	echo ""
-	exit 0
+	exit 2
 fi
 #nic=`sudo lshw -class network | grep "logical name\|nome lógico" | cut -d ":" -f 2 | head -1 | xargs`
-nics=($(ls -l /sys/class/net/ | grep -v virtual | cut -d " " -f9 | grep .))
+nics=($(ls -ld /sys/class/net/* | grep -v virtual | rev | cut -d "/" -f 1 | rev))
 clear
 build_banner "NETWORK INTERFACE CONFIGURATION" "bs4it@2022"
 echo " "

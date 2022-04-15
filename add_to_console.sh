@@ -59,6 +59,12 @@ do
 	echo -n $count "- "
 	echo "$i"
 done
+if [ -z $mountpoints ]; then
+   echo "No XFS mount point found on this system. Please check your mount points."
+   echo "Quitting.."
+   read -p "Press ENTER to continue."
+   exit 1
+fi
 echo ""
 echo "Select one of the XFS mount points above to use as a Veeam Repository"
 mountpoint_selection=0
@@ -81,7 +87,7 @@ echo " "
 echo -e "${YELLOW}Adding repository to Veeam Backup & Replication console.${NC}"
 echo ""
 echo -e "${WHITE}You MUST use the "'"bs4it_create_repo.ps1"'" PowerShell script to add this repository.${NC}."
-echo -e "${WHITE}It can be downloaded now from ${YELLOW}http://$fqdn${NC}."
+echo -e "${WHITE}It can be downloaded now from ${YELLOW}http://$fqdn${NC} or ${YELLOW}http://$local_ip${NC}."
 echo ""
 echo -e -n "Unlocking service user account..."
 # Set serviceuser password

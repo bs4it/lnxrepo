@@ -7,6 +7,7 @@ webserver_pid=$1
 fqdn=$2
 source $(dirname "$0")/functions/colors.sh
 source $(dirname "$0")/functions/build_banner.sh
+local_ip=$(ip a | grep inet | grep -v inet6 | grep -v 127.0.0.1 | xargs | cut -d " " -f 2 | cut -d "/" -f 1)
 #function
 convertsecs() {
    ((h=${1}/3600))
@@ -22,7 +23,7 @@ echo " "
 echo -e "${YELLOW}Adding repository to Veeam Backup & Replication console.${NC}"
 echo ""
 echo -e "${WHITE}You MUST use the "'"bs4it_create_repo.ps1"'" PowerShell script to add this repository.${NC}."
-echo -e "${WHITE}It can be downloaded now from ${YELLOW}http://$fqdn${NC}."
+echo -e "${WHITE}It can be downloaded now from ${YELLOW}http://$fqdn${NC} or ${YELLOW}http://$local_ip${NC}."
 echo ""
 if ps -p $webserver_pid > /dev/null
 then

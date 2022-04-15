@@ -23,19 +23,19 @@ detect_os () {
         os_family="redhat"
     fi
     if [ $compatible_distro == 1 ] && [ $compatible_kernel == 1 ]; then
-            echo "Seu Sistema operacional é suportado! :)"
+            echo "This operating system is supported! :)"
         echo "Sistema detectado - $os, Kernel $kernel_major.$kernel_minor"
     else
-        echo "Seu Sistema operacional não é suportado! :( "
-        echo "Sistema detectado - $os, Kernel $kernel_major.$kernel_minor"
+        echo "This operating system is not supported! :( "
+        echo "Detected O.S. - $os, Kernel $kernel_major.$kernel_minor"
         echo ""
-        echo "Os seguintes sistemas são suportados:"
+        echo "The following operating systems are supported:"
         echo "Ubuntu Server 20.04"
         echo "Debian 11"
         echo "Oracle Enterprise Linux 8"
         echo ""
-        echo "Versão mínima de Kernel: $kernel_minimal"
-        exit
+        echo "Minimum Kernel version: $kernel_minimal"
+        exit 2
     fi
 
 }

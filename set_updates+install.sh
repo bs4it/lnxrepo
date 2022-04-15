@@ -1,0 +1,40 @@
+#!/bin/bash
+# 2022 - Fernando Della Torre @ BS4IT
+source $(dirname "$0")/functions/colors.sh
+source $(dirname "$0")/functions/detect_os.sh
+source $(dirname "$0")/functions/build_banner.sh
+clear
+detect_os
+
+# Quit if not running suported O.S.
+if ! [[ $os == "debian-11" || $os == "ubuntu-20.04" ]]; then
+	echo -e "${LRED}This script does not support your O.S.${NC}"
+	echo -e "${LWHITE}You are running ${YELLOW}$os${NC}."
+	echo ""
+	exit 0
+fi
+
+clear
+build_banner "UPDATES + INSTALL" "bs4it@2022"
+echo " "
+echo -e "${YELLOW}Step 2 - Update system and install packages:${NC}"
+echo " "
+echo -e "Do you want to update the system and install the required packages? "
+echo -e "You need to have your network working to proceed."
+echo " "
+accept=""
+while ! [[ $accept = 'Y' || $accept = 'y' || $accept = 'N' || $accept = 'n' ]]
+do
+	echo -n -e "Apply latest updates and install packages now? ${YELLOW}(Y/N)${NC}:"
+	read accept
+	case $accept in
+		y|Y)
+			echo ""
+			sleep 0.3
+            bash $(dirname "$0")/functions/update+install_$os.sh
+            read -p "Press ENTER to continue."
+			;;
+		n|N)
+			;;
+  	esac
+done

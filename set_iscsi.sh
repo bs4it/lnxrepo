@@ -71,6 +71,7 @@ do
             read -p "Press any key to exit."
             exit 1
          fi
+         systemctl restart iscsid.service
          sleep 2
          clear
          build_banner "iSCSI INITIATOR CONFIGURATION" "bs4it@2022"

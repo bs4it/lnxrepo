@@ -39,6 +39,7 @@ do
 			;;
 		n|N)
 			echo "Quitting, bye!"
+			sleep 1
 			exit 0
 			;;
   	esac
@@ -76,6 +77,7 @@ echo -e -n ${NC}
 if [ $confirmdevice != $blkdevice ]; then
 	echo -e "${YELLOW}The confirmation you entered is wrong, quitting.${NC}"
 	echo -e "${YELLOW}Think twice and run this script again.${NC}"
+	read -p "Press ENTER to continue."
 	exit 1
 fi
 clear
@@ -90,6 +92,7 @@ read typedconfirmationcode
 if [ $typedconfirmationcode != $confirmationcode ]; then
 		echo ""
         echo -e "${YELLOW}Wrong code, quitting${NC}"
+		read -p "Press ENTER to continue."
         exit 1
 fi
 echo ""
@@ -109,6 +112,7 @@ sleep 0.3
 if [ $result != 0 ]; then
 	echo -e "Unable to erase device $blkdevice - error $result"
 	echo -e "${YELLOW}This device may be mounted or is part of a LVM. Please verify. Quitting.${NC}"
+	read -p "Press ENTER to continue."
 	exit 1
 fi
 echo -e "${LGREEN}OK${NC}"
@@ -120,6 +124,7 @@ sleep 0.3
 if [ $result != 0 ]; then
 	echo -e "Unable to create Physical Volume - error $result"
 	echo -e "This device may be mounted or is part of a LVM. Please verify. Quitting."
+	read -p "Press ENTER to continue."
 	exit 1
 fi
 echo -e "${LGREEN}OK${NC}"
@@ -136,6 +141,7 @@ sleep 0.3
 if [ $result != 0 ]; then
 	echo -e "Unable to create Volume Group - error $result"
 	echo -e "Fix what is wrong and try again. Quitting."
+	read -p "Press ENTER to continue."
 	exit 1
 fi
 echo -e "${LGREEN}OK${NC}"
@@ -152,6 +158,7 @@ sleep 0.3
 if [ $result != 0 ]; then
 	echo -e "Unable to create Logical Volume - error $result"
 	echo -e "Fix what is wrong and try again. Quitting."
+	read -p "Press ENTER to continue."
 	exit 1
 fi
 echo -e "${LGREEN}OK${NC}"
@@ -163,6 +170,7 @@ sleep 0.3
 if [ $result != 0 ]; then
 	echo -e "Unable to create XFS filesystem - error $result"
 	echo -e "Fix what is wrong and try again. Quitting."
+	read -p "Press ENTER to continue."
 	exit 1
 fi
 echo -e "${LGREEN}OK${NC}"
@@ -215,3 +223,4 @@ echo -e "${LGREEN}OK${NC}"
 echo " "
 echo -e "Done!"
 sleep 1
+read -p "Press ENTER to continue."

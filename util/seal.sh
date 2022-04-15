@@ -1,8 +1,8 @@
 #!/bin/bash
 # 2022 - Fernando Della Torre @ BS4IT
 # prepare the s.o. for the customer
-echo -e "\033[1;37mCopying issue file...\033[0m"
-cp $(dirname "$0")/issue /etc/issue
+echo -e "\033[1;37mBuilding issue file...\033[0m"
+echo -e "\033[1;31mBS4IT\033[0m - Veeam Linux Hardened Repository (\l)" > /etc/issue
 echo -e "\033[1;37mSetting GRUB...\033[0m"
 sed -i 's/^GRUB_TIMEOUT=.*/GRUB_TIMEOUT=3/' /etc/default/grub 2>/dev/null
 sed -i 's/^GRUB_DISTRIBUTOR=.*/GRUB_DISTRIBUTOR="BS4IT - Veeam Linux Hardened Repository"/' /etc/default/grub 2>/dev/null
