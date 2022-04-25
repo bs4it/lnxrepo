@@ -1,0 +1,25 @@
+Validar os
+nome de usuario para adm remota
+inserir chaves ssh
+altera porta do SSH
+ajusta user de adm remota no sshd_config AllowUsers
+configura firewall
+cria usuário de serviço
+solicita mountpoint ou Le de script anterior
+cria user local
+ajustar permissoes do mountpoint
+subir webserver com as credenciais + json
+cleanup
+
+
+MACRO
+1-Set net
+2-Update and install packages
+3-Harden SSH + Firewall + create files and Crontab
+4-Create users + publish
+5-Set iSCSI
+6-Set disk + mount + permissions
+7-Add to Veeam
+
+havera um cgi no script de add que recebera um sinal do powershell ao concluir a configuração do server na console.
+isso terminará o webserver, tb haverá a opção de termina-lo manualmente

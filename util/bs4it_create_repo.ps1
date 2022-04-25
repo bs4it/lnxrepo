@@ -54,8 +54,9 @@ do {
     Write-Host -ForegroundColor Red "$errmsg"
     # Ask source IP
     $IP = Read-Host -Prompt "Server IP or FQDN"
-    if (-Not ($IP -as [ipaddress] -as [Bool] -eq $true)){$errmsg = "Please enter a valid IPV4 address!"}
-} while (($IP.Length -eq 0) -or -Not ($IP -as [ipaddress] -as [Bool] -eq $true))
+    #if (-Not ($IP -as [ipaddress] -as [Bool] -eq $true)){$errmsg = "Please enter a valid IPV4 address!"}
+#} while (($IP.Length -eq 0) -or -Not ($IP -as [ipaddress] -as [Bool] -eq $true))
+} while (($IP.Length -eq 0))
 Write-Output "Connecting to $IP"
 $lnxServer = Invoke-RestMethod -TimeoutSec 2 -Uri "http://$($IP)/server.json"
 $Server = Get-VBRServer -Name $lnxServer.Name.ToLower()
