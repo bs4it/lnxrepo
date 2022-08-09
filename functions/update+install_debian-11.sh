@@ -23,7 +23,7 @@ else
 fi
 
 echo -e "${WHITE}Building issue file...${NC}"
-echo -e "\033[1;31mBS4IT\033[0m - Veeam Linux Hardened Repository (\l)" > /etc/issue
+echo -e "\033[1;34mBS4IT\033[0m - Veeam Linux Hardened Repository (\l)" > /etc/issue
 echo -e "${WHITE}Customising GRUB...${NC}"
 sed -i 's/^GRUB_TIMEOUT=.*/GRUB_TIMEOUT=3/' /etc/default/grub 2>/dev/null
 sed -i 's/^GRUB_DISTRIBUTOR=.*/GRUB_DISTRIBUTOR="BS4IT - Veeam Linux Hardened Repository"/' /etc/default/grub 2>/dev/null
