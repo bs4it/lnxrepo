@@ -1,11 +1,5 @@
 ## Default values
 # 2022 - Fernando Della Torre @ BS4IT
-$Folder = "backups" #Folder created inside base path
-$EnableXFSFastClone = $true
-$EnableBackupImmutability = $true
-$AlignDataBlocks = $true
-$ImmutabilityPeriod = 7
-
 
 function Set-UseUnsafeHeaderParsing
 {
@@ -48,7 +42,7 @@ do {
     # Clear Screen
     Clear-Host
     # Write welcome and first instructions
-    Write-Host -ForegroundColor Green "Add Linux Server"
+    Write-Host -ForegroundColor Green "Upgrade Linux Server"
     Write-Output ""
     Write-Host -ForegroundColor Red "$errmsg"
     # Ask source IP

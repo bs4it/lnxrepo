@@ -11,7 +11,7 @@ echo -e "${YELLOW}$upgrade_result${NC}"
 echo -e "${WHITE}Installing packages... ${NC}"
 upgrade_result=$(apt dist-upgrade -y -qq  2>/dev/null)
 echo -n -e "${YELLOW}"
-apt install -y -qqq wget python3 net-tools vim tcpdump iptraf-ng htop sysstat lvm2 xfsprogs open-iscsi lsscsi nfs-common sudo tmux ufw 2>/dev/null
+apt install -y -qqq wget python3 net-tools vim tcpdump iptraf-ng htop sysstat lvm2 xfsprogs open-iscsi lsscsi scsitools gdisk nfs-common sudo tmux ufw 2>/dev/null
 packages_install_status=$?
 if [ $packages_install_status -eq 0 ]; then
   echo -e "${WHITE}Installing packages... ${LGREEN}OK${NC}"
@@ -22,7 +22,7 @@ else
   exit 1
 fi
 
-echo -e "${WHITE}37mBuilding issue file...${NC}"
+echo -e "${WHITE}Building issue file...${NC}"
 echo -e "\033[1;31mBS4IT\033[0m - Veeam Linux Hardened Repository (\l)" > /etc/issue
 echo -e "${WHITE}Customising GRUB...${NC}"
 sed -i 's/^GRUB_TIMEOUT=.*/GRUB_TIMEOUT=3/' /etc/default/grub 2>/dev/null
