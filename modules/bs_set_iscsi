@@ -1,7 +1,7 @@
 #!/bin/bash
 # 2022 - Fernando Della Torre @ BS4IT
-source $(dirname "$0")/functions/colors.sh
-source $(dirname "$0")/functions/build_banner.sh
+source $(dirname "$0")/../functions/colors.sh
+source $(dirname "$0")/../functions/build_banner.sh
 clear
 build_banner "iSCSI INITIATOR CONFIGURATION" "bs4it@2022"
 echo " "

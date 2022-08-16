@@ -1,12 +1,12 @@
 #!/bin/bash
 # 2022 - Fernando Della Torre
-source $(dirname "$0")/functions/colors.sh
-source $(dirname "$0")/functions/IPprefix_by_netmask.sh
-source $(dirname "$0")/functions/detect_os.sh
-source $(dirname "$0")/functions/build_banner.sh
+source $(dirname "$0")/../functions/colors.sh
+source $(dirname "$0")/../functions/IPprefix_by_netmask.sh
+source $(dirname "$0")/../functions/detect_os.sh
+source $(dirname "$0")/../functions/build_banner.sh
 clear
-detect_os
-#os="debian-11"
+#detect_os
+os="debian-11"
 # Quit if not running suported O.S.
 if ! [[ $os == "debian-11" || $os == "ubuntu-20.04" ]]; then
 	echo -e "${LRED}This script does not support your O.S.${NC}"

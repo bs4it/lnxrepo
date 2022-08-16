@@ -8,7 +8,7 @@ build_banner () {
     text=$1
     text2=$2
     if [ -z $3 ]; then
-        color="42"
+        color="44"
     else
         color=$3
     fi
@@ -32,7 +32,7 @@ build_banner () {
     # 3rd line
     echo -n -e "\e[1;97;${color}m"
     fill_line $(expr $terminal_size - $text2_size - 1)
-    echo -n -e "\e[1;90;${color}m$text2"
+    echo -n -e "\e[1;94;${color}m$text2"
     fill_line 1
     echo -e "\e[0m"
 }

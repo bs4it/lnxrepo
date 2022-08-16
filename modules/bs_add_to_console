@@ -3,10 +3,10 @@
 # Variables
 adminuserkey="ssh-ed25519 AAAAC3NzaC1lZDI1NTE5AAAAIFb+0VowllRHoxIWZdRPPf8tTxd2XueqTOJOn72bxuUv"
 
-source $(dirname "$0")/functions/colors.sh
-source $(dirname "$0")/functions/build_banner.sh
-source $(dirname "$0")/functions/detect_os.sh
-source $(dirname "$0")/functions/get_users.sh
+source $(dirname "$0")/../functions/colors.sh
+source $(dirname "$0")/../functions/build_banner.sh
+source $(dirname "$0")/../functions/detect_os.sh
+source $(dirname "$0")/../functions/get_users.sh
 fqdn=$(hostname -f)
 local_ip=$(ip a | grep inet | grep -v inet6 | grep -v 127.0.0.1 | xargs | cut -d " " -f 2 | cut -d "/" -f 1)
 ssh_port=$(egrep "^Port" /etc/ssh/sshd_config | cut -d " " -f 2)
@@ -99,7 +99,7 @@ passwd -u $serviceuser
 # Set serviceuser shell
 usermod -s /bin/bash $serviceuser
 # give serviceuser sudo
-source $(dirname "$0")/functions/sudo_add.sh $serviceuser
+source $(dirname "$0")/../functions/sudo_add.sh $serviceuser
 # Set ssh to allow serviceuser
 sed -i "s/^PasswordAuthentication.*/PasswordAuthentication yes/" /etc/ssh/sshd_config
 sed -i "s/^AllowUsers.*/AllowUsers $adminuser $serviceuser/" /etc/ssh/sshd_config
@@ -123,7 +123,7 @@ fi
 
 # build server.json
 echo -e "Building web content..."
-cp $(dirname "$0")/util/bs4it_create_repo.ps1 /tmp/bs4it_create_repo.ps1
+cp $(dirname "$0")/../util/bs4it_create_repo.ps1 /tmp/bs4it_create_repo.ps1
 cat > /tmp/server.json <<EOF
 {
 "Name": "$fqdn",
@@ -159,7 +159,7 @@ cat > /tmp/index.html <<EOF
             left: 0;
             bottom: 0;
             width: 100%;
-            background-color: FireBrick;
+            background-color: #053469;
             color: white;
             font-family: sans-serif;
             font-size: 12px;
@@ -169,7 +169,7 @@ cat > /tmp/index.html <<EOF
    </head>
 <body>
    <font face="sans-serif">
-   <h3><font color='#B22222'>PowerShell Script Download</font></h3>
+   <h3><font color='#053469'>PowerShell Script Download</font></h3>
    <hr>
    <font color='#000000'>
    Click the button bellow to download the PowerShell script to the VB&R console.<br>
@@ -229,12 +229,13 @@ then
 else
    echo "Web server is not running. Something went wrong."
    echo "Quitting..."
+   (rm -f /tmp/status /tmp/index.html /tmp/cgi-bin/status.py /tmp/server.json; rmdir /tmp/cgi-bin)
    sleep 3
    exit 1
 fi
 sleep 2
 # call script to count and allow ctrl+c
-(trap 2; bash $(dirname "$0")/add_to_console_count.sh $webserver_pid $fqdn)
+(trap 2; bash $(dirname "$0")/bs_add_to_console_count $webserver_pid $fqdn)
 # protect this script against ctrl+c
 trap '' 2
 clear
@@ -251,7 +252,7 @@ echo -e "Removing firewall rule for HTTP..."
 ufw --force delete allow http 1>/dev/null
 sleep 0.3
 echo -e "Cleaning up temporary files..."
-(rm -f /tmp/status /tmp/index.html /tmp/cgi-bin/status.py; rmdir /tmp/cgi-bin)
+(rm -f /tmp/status /tmp/index.html /tmp/cgi-bin/status.py /tmp/server.json; rmdir /tmp/cgi-bin)
 sleep 0.3
 echo -e "Locking service user account..."
 # Lock serviceuser
@@ -259,7 +260,7 @@ passwd -l $serviceuser
 # Set serviceuser shell to nologin
 usermod -s /sbin/nologin $serviceuser
 # give serviceuser sudo
-source $(dirname "$0")/functions/sudo_remove.sh $serviceuser
+source $(dirname "$0")/../functions/sudo_remove.sh $serviceuser
 # Set ssh to allow serviceuser
 sed -i "s/^PasswordAuthentication.*/PasswordAuthentication no/" /etc/ssh/sshd_config
 # Allows only the remote admin user to login into SSH

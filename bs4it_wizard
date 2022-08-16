@@ -19,7 +19,7 @@ clear
 build_banner "BS4IT - Linux Hardened Repository Setup Wizard" "bs4it@2022"
 echo " "
 echo -e "${YELLOW}WELCOME!${NC}" 
-echo "$os detected."
+#echo "$os detected."
 echo " "
 echo -e "The next steps will help you to setup a Linux Hardened Repository to store your Veeam Backup & Replication data."
 echo ""

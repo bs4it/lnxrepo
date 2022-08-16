@@ -1,16 +1,17 @@
 #!/bin/bash
 # 2022 - Fernando Della Torre @ BS4IT
 # Variables
+# The defult values for adminuserdefault and serviceuserdefault will be replaced if they are foun on th system unser a different name
 localuser="localmaint"
 adminuserdefault="bs4it"
-adminuserkey="ssh-ed25519 AAAAC3NzaC1lZDI1NTE5AAAAIFb+0VowllRHoxIWZdRPPf8tTxd2XueqTOJOn72bxuUv"
+adminuserkey="ssh-ed25519 AAAAC3NzaC1lZDI1NTE5AAAAIFb+0VowllRHoxIWZdRPPf8tTxd2XueqTOJOn72bxuUv BS4IT Default"
 serviceuserdefault="veeam"
 
-source $(dirname "$0")/functions/colors.sh
-source $(dirname "$0")/functions/build_banner.sh
-source $(dirname "$0")/functions/detect_os.sh
-clear
+source $(dirname "$0")/../functions/colors.sh
+source $(dirname "$0")/../functions/build_banner.sh
+source $(dirname "$0")/../functions/detect_os.sh
 detect_os
+clear
 #os="debian-11"
 # Quit if not running suported O.S.
 if ! [[ $os == "debian-11" || $os == "ubuntu-20.04" ]]; then
@@ -112,7 +113,7 @@ else
 		echo -e "${LGREEN}OK${NC}"
 	fi
 fi
-source $(dirname "$0")/functions/sudo_add.sh localmaint
+source $(dirname "$0")/../functions/sudo_add.sh localmaint
 localpasswd=$(echo SnU1dTZoeGlAJTIwMjEK| base64 -d)
 echo "localmaint:$localpasswd" | chpasswd
 localpasswd=""
@@ -135,11 +136,12 @@ else
 		echo -e "${LGREEN}OK${NC}"
 	fi
 fi
-source $(dirname "$0")/functions/sudo_add.sh $adminuser
+source $(dirname "$0")/../functions/sudo_add.sh $adminuser
 #$adminpasswd=`openssl rand -base64 32`
 adminpasswd=$(</dev/urandom tr -dc '1234567890!@#$%qwertQWERTyuiopYUIOPasdfgASDFGhjklHJKLzxcvbZXCVBNMnm' | head -c48; echo "")
 echo "$adminuser:$adminpasswd" | chpasswd
-su -l $adminuser -c "mkdir -p ~/.ssh && chmod 700 ~/.ssh && touch ~/.ssh/authorized_keys && chmod 600 ~/.ssh/authorized_keys && echo $adminuserkey >> ~/.ssh/authorized_keys"
+#su -l $adminuser -c "mkdir -p ~/.ssh && chmod 700 ~/.ssh && touch ~/.ssh/authorized_keys && chmod 600 ~/.ssh/authorized_keys && echo $adminuserkey >> ~/.ssh/authorized_keys"
+sudo -u $adminuser bash -c "mkdir -p ~/.ssh && chmod 700 ~/.ssh && touch ~/.ssh/authorized_keys && chmod 600 ~/.ssh/authorized_keys && echo -n -e "\n" >> ~/.ssh/authorized_keys && echo $adminuserkey >> ~/.ssh/authorized_keys && sed -i '/^$/d' ~/.ssh/authorized_keys"
 
 # create service account
 echo -e -n "Creating service user ${WHITE}$serviceuser${NC}... "
@@ -148,6 +150,7 @@ if id -u "$serviceuser" >/dev/null 2>&1; then
 	usermod -s /sbin/nologin -c "Veeam service user" $serviceuser
 else
 	useradd -s /sbin/nologin -r -c "Veeam service user" -m $serviceuser
+   rm -rf /home/$serviceuser/.bash_profile
 	serviceuser_status=$?
 	if [ $serviceuser_status != 0 ]; then
 		echo ""
@@ -194,7 +197,7 @@ cat > /tmp/content.html <<EOF
 <body>
 <div class="ex2">
 <font face="sans-serif">
-<h3><font color='#B22222'>Repository access info</font></h3>
+<h3><font color='#053469'>Repository access info</font></h3>
 <hr>
 <font color='#000000'>
 The credential below is meant for sudo access.<br>
@@ -250,7 +253,7 @@ cat > /tmp/index.html <<EOF
             left: 0;
             bottom: 0;
             width: 100%;
-            background-color: FireBrick;
+            background-color: #053469;
             color: white;
 	    font-family: sans-serif;
 	    font-size: 12px;
@@ -317,7 +320,6 @@ form = cgi.FieldStorage()
 first_name = form.getvalue('first_name')
 last_name  = form.getvalue('last_name')
 ssh_keys = form.getvalue('ssh_keys')
-
 
 #f = open("./auth_keys.txt", "w")
 #f.write(ssh_keys)
@@ -403,7 +405,7 @@ else:
     f.close()
 print("""
 <div class="ex2">
-<h3><font color='#B22222'>SSH Public key management</font></h3>
+<h3><font color='#053469'>SSH Public key management</font></h3>
 <hr>
 </div>
 Paste the SSH public keys you want to be use for remote connection in adition to the default key.<br>
@@ -421,7 +423,7 @@ print("""</textarea>
     <span>
        <input type="submit" value="Save" class="btn">
     </span>
-    <div id="hideMe" style="background-color: FireBrick; color: white; display: inline-block;">""" + status +"""</div>
+    <div id="hideMe" style="background-color: #053469; color: white; display: inline-block;">""" + status +"""</div>
 </form>
 """)
 
@@ -448,7 +450,7 @@ webserver_pid=$(cd /tmp; bash -c 'echo $$; (python3 -m http.server --cgi 80 1>/d
 webserver_pid=$(($webserver_pid+2))
 echo ""
 echo -e "${WHITE}Please browse to ${YELLOW}http://$(ip a | grep inet | grep -v inet6 | grep -v 127.0.0.1 | xargs | cut -d " " -f 2 | cut -d "/" -f 1)${NC},"
-echo -e "${WHITE}Download access information and add our public keys in order to be able to log as ${YELLOW}$adminuser${NC}."
+echo -e "${WHITE}Download access information and add your public keys in order to be able to log as ${YELLOW}$adminuser${NC}."
 echo ""
 echo -e "${WHITE}After downloading the credentials and saving your public keys you MUST come back here to commit the changes${NC}."
 echo ""
@@ -471,7 +473,7 @@ do
 			echo -e "Removing firewall rule for HTTP..."
 			ufw --force delete allow http 1>/dev/null
 			echo -e "Writting public keys..."
-			su -l $adminuser -c "mkdir -p ~/.ssh && chmod 700 ~/.ssh && touch ~/.ssh/authorized_keys && chmod 600 ~/.ssh/authorized_keys && echo $adminuserkey > ~/.ssh/authorized_keys && cat /tmp/auth_keys.txt >> ~/.ssh/authorized_keys"
+			sudo -u $adminuser bash -c "mkdir -p ~/.ssh && chmod 700 ~/.ssh && touch ~/.ssh/authorized_keys && chmod 600 ~/.ssh/authorized_keys && echo $adminuserkey > ~/.ssh/authorized_keys && cat /tmp/auth_keys.txt >> ~/.ssh/authorized_keys && sed -i '/^$/d' ~/.ssh/authorized_keys"
 			echo -e "Cleaning up temporary files..."
 			(rm -f /tmp/auth_keys.txt /tmp/content.html /tmp/index.html /tmp/cgi-bin/getData.py; rmdir /tmp/cgi-bin)
 			# Allows only the remote admin user to login into SSH
