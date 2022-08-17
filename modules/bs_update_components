@@ -215,7 +215,7 @@ echo -e "Removing firewall rule for HTTP..."
 ufw --force delete allow http 1>/dev/null
 sleep 0.3
 echo -e "Cleaning up temporary files..."
-(rm -f /tmp/status /tmp/index.html /tmp/cgi-bin/status.py; rmdir /tmp/cgi-bin)
+(rm -f /tmp/status /tmp/index.html /tmp/cgi-bin/status.py /tmp/server.json; rmdir /tmp/cgi-bin)
 sleep 0.3
 echo -e "Locking service user account..."
 # Lock serviceuser
@@ -223,7 +223,7 @@ passwd -l $serviceuser
 # Set serviceuser shell to nologin
 usermod -s /sbin/nologin $serviceuser
 # give serviceuser sudo
-source $(dirname "$0")/functions/sudo_remove.sh $serviceuser
+source $(dirname "$0")/../functions/sudo_remove.sh $serviceuser
 # Set ssh to allow serviceuser
 sed -i "s/^PasswordAuthentication.*/PasswordAuthentication no/" /etc/ssh/sshd_config
 # Allows only the remote admin user to login into SSH
