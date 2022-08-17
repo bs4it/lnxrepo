@@ -49,12 +49,13 @@ do
 	echo -e " ${YELLOW}6${NC} - Setup Disk, LVM, Filesystem and Mount Point + Permissions"
 	echo -e " ${YELLOW}7${NC} - Add to Veeam backup & Replication Console"
 	echo -e " ${YELLOW}8${NC} - Update repository components"
-	echo -e " ${YELLOW}9${NC} - Exit to shell"
-	echo -e " ${YELLOW}10${NC} - Logoff"
+	echo -e " ${YELLOW}9${NC} - Check for tool updates"
+	echo -e " ${YELLOW}10${NC} - Exit to shell"
+	echo -e " ${YELLOW}11${NC} - Logoff"
 	echo ""
 	echo -n -e "Your selection ${YELLOW}(0-9)${NC}: "
 	read selection
-	 	if [[ $selection -lt 0  || $selection -gt 10 ]]; then
+	 	if [[ $selection -lt 0  || $selection -gt 11 ]]; then
  			echo "Selection out of range."
 			sleep 1
  		fi
@@ -96,6 +97,11 @@ do
 			sleep 0.3
 			;;
 		9)
+			echo "To be implemented..."
+			sleep 1
+			sleep 0.3
+			;;
+		10)
 			echo "Entering shell, to return type 'exit'."
 			if [ ! -z $(printenv SUDO_USER) ]; then
 				runninguser=$(printenv SUDO_USER)
@@ -104,7 +110,7 @@ do
 			fi
 			sudo -u $runninguser /bin/bash
 			;;
-		10)
+		11)
 			echo "Logging off..."
 			sleep 1
 			exit; logout
