@@ -198,7 +198,7 @@ else
 fi
 sleep 2
 # call script to count and allow ctrl+c
-(trap 2; bash $(dirname "$0")/upgrade_components_count.sh $webserver_pid $fqdn)
+(trap 2; bash $(dirname "$0")/bs_upgrade_components_count $webserver_pid $fqdn)
 # protect this script against ctrl+c
 trap '' 2
 clear
