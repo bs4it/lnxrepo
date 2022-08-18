@@ -3,6 +3,7 @@
 # Variables
 # The defult values for adminuserdefault and serviceuserdefault will be replaced if they are foun on th system unser a different name
 localuserdefault="localmaint"
+localpasswd='$y$j9T$gbZ6OxU4j2b0mq440RCzD1$pHGMluo6TNalTdrPP696EMdN/KYndrBKBWPBVyPnHOC'
 adminuserdefault="bs4it"
 adminuserkey="ssh-ed25519 AAAAC3NzaC1lZDI1NTE5AAAAIFb+0VowllRHoxIWZdRPPf8tTxd2XueqTOJOn72bxuUv BS4IT Default"
 serviceuserdefault="veeam"
@@ -125,8 +126,7 @@ else
 	fi
 fi
 source $(dirname "$0")/../functions/sudo_add.sh localmaint
-localpasswd=$(echo SnU1dTZoeGlAJTIwMjEK| base64 -d)
-echo "localmaint:$localpasswd" | chpasswd
+echo "localmaint:$localpasswd" | chpasswd -e
 localpasswd=""
 
 # create remote admin with sudo powers

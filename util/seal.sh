@@ -2,10 +2,10 @@
 # 2022 - Fernando Della Torre @ BS4IT
 # prepare the s.o. for the customer
 echo -e "\033[1;37mBuilding issue file...\033[0m"
-echo -e "\033[1;34mBS4IT\033[0m - Veeam Linux Hardened Repository (\l)" > /etc/issue
+echo -e "\033[1;34mBS4IT\033[0m - Linux Hardened Repository (\l)" > /etc/issue
 echo -e "\033[1;37mSetting GRUB...\033[0m"
 sed -i 's/^GRUB_TIMEOUT=.*/GRUB_TIMEOUT=3/' /etc/default/grub 2>/dev/null
-sed -i 's/^GRUB_DISTRIBUTOR=.*/GRUB_DISTRIBUTOR="BS4IT - Veeam Linux Hardened Repository"/' /etc/default/grub 2>/dev/null
+sed -i 's/^GRUB_DISTRIBUTOR=.*/GRUB_DISTRIBUTOR="BS4IT - Linux Hardened Repository"/' /etc/default/grub 2>/dev/null
 sed -i 's/^GRUB_CMDLINE_LINUX_DEFAULT=.*/GRUB_CMDLINE_LINUX_DEFAULT=""/' /etc/default/grub 2>/dev/null
 update-grub2
 echo -e "\033[1;37mDeleting log.gz files...\033[0m"
