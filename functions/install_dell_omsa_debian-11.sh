@@ -5,7 +5,7 @@ echo "Debian 11 detected"
 echo -e "${WHITE}Adding Dell APT repository... ${NC}"
 echo 'deb https://linux.dell.com/repo/community/openmanage/10300/focal/ focal main' > /etc/apt/sources.list.d/linux.dell.com.sources.list
 echo -e "${WHITE}Installing gnupg2..."
-apt-get install -y -qq gnupg2
+apt-get install -y gnupg2
 echo -n -e "${WHITE}Updating APT... ${NC}"
 apt-get update -y -q
 echo -n -e "${WHITE}Installing dependencies ported from Ubuntu 20.04 packages... ${NC}"
@@ -19,7 +19,6 @@ if [ $packages_install_status -eq 0 ]; then
 else
   echo -e "${WHITE}Installing Dell packages... ${LRED}FAILED${NC}"
   echo -e "${YELLOW}Check your internet connection and package manager health.${NC}"
-  read -p "Press any key to exit."
   exit 1
 fi
 echo -e "${WHITE}Starting Dell OMSA Services... ${NC}"
@@ -29,5 +28,4 @@ systemctl start dsm_sa_snmpd.service
 systemctl start dsm_om_connsvc.service
 systemctl start dsm_om_shrsvc.service
 echo -e "Finished."
-read -p "Press any key to exit."
 exit 0
