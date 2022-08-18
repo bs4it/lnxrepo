@@ -14,13 +14,20 @@ echo -e "${WHITE}Installing Dell packages... ${NC}"
 apt-get install -y -q srvadmin-all
 packages_install_status=$?
 if [ $packages_install_status -eq 0 ]; then
-  echo -e "${WHITE}Installing packages... ${LGREEN}OK${NC}"
+  echo -e "${WHITE}Installing Dell packages... ${LGREEN}OK${NC}"
   sleep 2
 else
-  echo -e "${WHITE}Installing packages... ${LRED}FAILED${NC}"
+  echo -e "${WHITE}Installing Dell packages... ${LRED}FAILED${NC}"
   echo -e "${YELLOW}Check your internet connection and package manager health.${NC}"
-  echo -e "Finished."
   read -p "Press any key to exit."
   exit 1
 fi
+echo -e "${WHITE}Starting Dell OMSA Services... ${NC}"
+systemctl start dsm_sa_datamgrd.service
+systemctl start dsm_sa_eventmgrd.service
+systemctl start dsm_sa_snmpd.service
+systemctl start dsm_om_connsvc.service
+systemctl start dsm_om_shrsvc.service
+echo -e "Finished."
+read -p "Press any key to exit."
 exit 0
