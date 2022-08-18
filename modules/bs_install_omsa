@@ -17,7 +17,7 @@ fi
 clear
 build_banner "Install Dell OMSA" "bs4it@2022"
 echo " "
-echo -e "${YELLOW}Install Dell O.M.S.A.:${NC}"
+echo -e "${YELLOW}Install Dell OMSA:${NC}"
 echo " "
 echo -e "This will install Dell OMSA and its dependencies."
 echo " "
