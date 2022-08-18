@@ -4,9 +4,9 @@ source $(dirname "$0")/colors.sh
 echo "Debian 11 detected"
 echo -e "${WHITE}Adding Dell APT repository... ${NC}"
 echo 'deb https://linux.dell.com/repo/community/openmanage/10300/focal/ focal main' > /etc/apt/sources.list.d/linux.dell.com.sources.list
-echo -e "${WHITE}Installing gnupg2..."
+echo -e "${WHITE}Installing gnupg2... ${NC}"
 apt-get install -y gnupg2
-echo -e "${WHITE}Getting repository key..."
+echo -e "${WHITE}Getting repository key... ${NC}"
 wget -qO - https://linux.dell.com/repo/pgp_pubkeys/0x1285491434D8786F.asc | apt-key add -
 echo -n -e "${WHITE}Updating APT... ${NC}"
 apt-get update -y -q
