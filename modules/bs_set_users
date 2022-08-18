@@ -2,7 +2,7 @@
 # 2022 - Fernando Della Torre @ BS4IT
 # Variables
 # The defult values for adminuserdefault and serviceuserdefault will be replaced if they are foun on th system unser a different name
-localuser="localmaint"
+localuserdefault="localmaint"
 adminuserdefault="bs4it"
 adminuserkey="ssh-ed25519 AAAAC3NzaC1lZDI1NTE5AAAAIFb+0VowllRHoxIWZdRPPf8tTxd2XueqTOJOn72bxuUv BS4IT Default"
 serviceuserdefault="veeam"
@@ -20,7 +20,7 @@ fi
 if [ ! -z $serviceuser ]; then
    serviceuserdefault=$serviceuser
 fi
-
+localuser=$localuserdefault
 detect_os
 clear
 #os="debian-11"
