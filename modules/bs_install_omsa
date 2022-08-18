@@ -1,0 +1,39 @@
+#!/bin/bash
+# 2022 - Fernando Della Torre @ BS4IT
+source $(dirname "$0")/../functions/colors.sh
+source $(dirname "$0")/../functions/detect_os.sh
+source $(dirname "$0")/../functions/build_banner.sh
+clear
+detect_os
+
+# Quit if not running suported O.S.
+if ! [[ $os == "debian-11" || $os == "ubuntu-20.04" ]]; then
+	echo -e "${LRED}This script does not support your O.S.${NC}"
+	echo -e "${LWHITE}You are running ${YELLOW}$os${NC}."
+	echo ""
+	exit 0
+fi
+
+clear
+build_banner "Install Dell OMSA" "bs4it@2022"
+echo " "
+echo -e "${YELLOW}Install Dell O.M.S.A.:${NC}"
+echo " "
+echo -e "This will install Dell OMSA and its dependencies."
+echo " "
+accept=""
+while ! [[ $accept = 'Y' || $accept = 'y' || $accept = 'N' || $accept = 'n' ]]
+do
+	echo -n -e "Do you want to continue? ${YELLOW}(Y/N)${NC}:"
+	read accept
+	case $accept in
+		y|Y)
+			echo ""
+			sleep 0.3
+            bash $(dirname "$0")/../functions/install_dell_omsa_$os.sh
+            read -p "Press ENTER to continue."
+			;;
+		n|N)
+			;;
+  	esac
+done
