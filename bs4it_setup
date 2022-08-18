@@ -38,7 +38,6 @@ do
 	echo " "
 	echo -e "This set of tools helps you to setup and maintain a Linux Hardened Repository."
 	echo -e "Select to run the Deploy Wizard or the desired standalone feature."
-	echo ""
 	echo -e ""
 	echo -e " ${YELLOW} 0${NC} - Deploy Wizard"
 	echo -e " ${YELLOW} 1${NC} - Set Network Interface"
