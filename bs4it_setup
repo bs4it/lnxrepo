@@ -112,7 +112,8 @@ do
 			else
 				runninguser=$(printenv USER)
 			fi
-			sudo -u $runninguser /bin/bash
+			trap ' '; sudo -u $runninguser /bin/bash
+			trap 2
 			;;
 		12)
 			echo "Logging off..."
