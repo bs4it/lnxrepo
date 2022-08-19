@@ -181,8 +181,7 @@ sleep 0.3
 if [ $fstabmount = 0 ]; then
 	echo -e ""${YELLOW}Not found. Entry will be created.${NC}""
 	sleep 0.2
-	echo -n -e "${WHITE}Enter the mountpoint for the new filesystem (e.g. /backup): ${NC}"
-	read mountpoint
+	read -p "Enter the mountpoint for the new filesystem (e.g. /backup):" mountpoint
 	if [ -z $mountpoint ]
 	then
 	    mountpoint=$mountpointdefault
