@@ -35,6 +35,7 @@ detect_os () {
         echo "Oracle Enterprise Linux 8"
         echo ""
         echo "Minimum Kernel version: $kernel_minimal"
+        read -p "Press ENTER to quit."
         exit 2
     fi
 
