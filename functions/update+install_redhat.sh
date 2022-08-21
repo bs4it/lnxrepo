@@ -10,7 +10,8 @@ echo -e "${WHITE}Installing packages... ${NC}"
 if [[ $os == "ol-8."* ]]; then
     dnf install oracle-epel-release-el8 -y
 else
-    dnf install epel-release -y
+    #dnf install epel-release -y
+    dnf install https://dl.fedoraproject.org/pub/epel/epel-release-latest-8.noarch.rpm
 fi
 
 dnf install wget tar python3 net-tools vim tcpdump iptraf-ng htop sysstat lvm2 xfsprogs lsscsi gdisk nfs-utils sudo bash-completion policycoreutils-python-utils iscsi-initiator-utils -y
