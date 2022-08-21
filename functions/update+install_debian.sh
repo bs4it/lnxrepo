@@ -1,7 +1,7 @@
 #!/bin/bash
 # 2022 - Fernando Della Torre @ BS4IT
 source $(dirname "$0")/colors.sh
-echo "Debian 11 detected"
+#echo "$os detected"
 echo -n -e "${WHITE}Updating APT... ${NC}"
 update_result=$(apt-get update -y -qq  2>/dev/null)
 echo -e "${YELLOW}$update_result${NC}"
@@ -120,7 +120,10 @@ cat << 'EOF' > /etc/cron.d/veeam_support_log_gen
 EOF
 echo -e "${WHITE}Setting menu autostart...${NC}"
 echo "exec sudo /opt/bs4it/lnxrepo/bs4it_setup" > /etc/skel/.bash_profile
-echo "exec sudo /opt/bs4it/lnxrepo/bs4it_setup" > /home/localmaint/.bash_profile
+if [[ -d /home/localmaint ]]; then
+    echo "exec sudo /opt/bs4it/lnxrepo/bs4it_setup" > /home/localmaint/.bash_profile
+    chown localmaint:localmaint /home/localmaint/.bash_profile
+fi
 echo -e "Done!"
 sleep 2
 

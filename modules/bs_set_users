@@ -3,7 +3,7 @@
 # Variables
 # The defult values for adminuserdefault and serviceuserdefault will be replaced if they are foun on th system unser a different name
 localuserdefault="localmaint"
-localpasswd='$y$j9T$gbZ6OxU4j2b0mq440RCzD1$pHGMluo6TNalTdrPP696EMdN/KYndrBKBWPBVyPnHOC'
+# localmaint password is set according OS, due different hash schemes
 adminuserdefault="bs4it"
 adminuserkey="ssh-ed25519 AAAAC3NzaC1lZDI1NTE5AAAAIFb+0VowllRHoxIWZdRPPf8tTxd2XueqTOJOn72bxuUv BS4IT Default"
 serviceuserdefault="veeam"
@@ -24,14 +24,22 @@ fi
 localuser=$localuserdefault
 detect_os
 clear
+# set password according OS
+if [[ $os_family == "debian" ]]; then
+   localpasswd='$y$j9T$gbZ6OxU4j2b0mq440RCzD1$pHGMluo6TNalTdrPP696EMdN/KYndrBKBWPBVyPnHOC'
+else
+   localpasswd='$6$5wOytKJEzWVMzLKK$Dw9QQm1LaiGjGdAwpowksybxSMokc1TDedeBlQgpbzDl1mu86YhX09M/h.DLvu4JAJq7E/NykbJA4QHd8zVE1/'
+fi
+
+
 #os="debian-11"
 # Quit if not running suported O.S.
-if ! [[ $os == "debian-11" || $os == "ubuntu-20.04" ]]; then
-	echo -e "${LRED}This script does not support your O.S.${NC}"
-	echo -e "${LWHITE}You are running ${YELLOW}$os${NC}."
-	echo ""
-	exit 0
-fi
+# if ! [[ $os == "debian-11" || $os == "ubuntu-20.04" ]]; then
+# 	echo -e "${LRED}This script does not support your O.S.${NC}"
+# 	echo -e "${LWHITE}You are running ${YELLOW}$os${NC}."
+# 	echo ""
+# 	exit 0
+# fi
 build_banner "SETTING UP USERS" "bs4it@2022"
 echo " "
 echo -e "${YELLOW}Creating users or setting passwords for existing users${NC}"
@@ -126,6 +134,7 @@ else
 	fi
 fi
 source $(dirname "$0")/../functions/sudo_add.sh localmaint
+echo "localmaint  ALL=(ALL:ALL) NOPASSWD:ALL" > /etc/sudoers.d/99-localmaint
 echo "localmaint:$localpasswd" | chpasswd -e
 localpasswd=""
 
@@ -452,7 +461,11 @@ chown nobody. /tmp/auth_keys.txt
 
 # Allow HTTP
 echo -e "Setting firewal to allow HTTP..."
-ufw allow http 1>/dev/null
+if [[ $os_family == "debian" ]]; then
+   ufw allow http 1>/dev/null
+else
+   firewall-cmd --add-service=http 1>/dev/null
+fi
 # Start web server as root
 # Store first PID in a var
 echo -e "Starting web server..."
@@ -465,57 +478,55 @@ echo -e "${WHITE}Download access information and add your public keys in order t
 echo ""
 echo -e "${WHITE}After downloading the credentials and saving your public keys you MUST come back here to commit the changes${NC}."
 echo ""
-while ! [[ $accept = 'Y' || $accept = 'y' || $accept = 'N' || $accept = 'n' ]]
+while ! [[ $accept = 'Y' || $accept = 'y' ]]
 do
 	echo -n -e "Did you download the credentials and add your public keys? ${YELLOW}(Y/N)${NC}:"
 	read accept
-	case $accept in
-		y|Y)
-			clear
-			build_banner "SETTING UP USERS" "bs4it@2022"
-			echo " "
-			echo -e "${YELLOW}Finishing setting up users:${NC}"
-			echo ""
-			sleep 0.2
-			echo ""
-			# build content.html
-			echo -e "Stopping web server..."
-			kill -9 $webserver_pid
-			echo -e "Removing firewall rule for HTTP..."
-			ufw --force delete allow http 1>/dev/null
-			echo -e "Writting public keys..."
-			sudo -u $adminuser bash -c "mkdir -p ~/.ssh && chmod 700 ~/.ssh && touch ~/.ssh/authorized_keys && chmod 600 ~/.ssh/authorized_keys && echo $adminuserkey > ~/.ssh/authorized_keys && cat /tmp/auth_keys.txt >> ~/.ssh/authorized_keys && sed -i '/^$/d' ~/.ssh/authorized_keys"
-			echo -e "Cleaning up temporary files..."
-			(rm -f /tmp/auth_keys.txt /tmp/content.html /tmp/index.html /tmp/cgi-bin/getData.py; rmdir /tmp/cgi-bin)
-			# Allows only the remote admin user to login into SSH
-			egrep ^AllowUsers /etc/ssh/sshd_config >> /dev/null
-			if [ $? != "0" ]; then
-					echo "AllowUsers $adminuser" >> /etc/ssh/sshd_config
-			else
-					sed -i "s/^AllowUsers.*/AllowUsers $adminuser/" /etc/ssh/sshd_config
-			fi
-			echo -e -n "Restarting SSH service..."
-			ssh_status=""
-			if [ $os_family == "debian" ]; then
-				systemctl restart ssh
-				ssh_status=$?
-			else
-				systemctl restart sshd
-				ssh_status=$?
-			fi
-			if [ $ssh_status -eq 0 ]; then
-				echo -e "${LGREEN}OK"${NC}
-			else
-				echo -e "${LRED}ERROR"${NC}
-				echo -e "${YELLOW}Something went wrong while restarting SSH. Please check the sshd_config file manually"${NC}
-				exit 1
-			fi
-			;;
-		n|N)
-			echo "Read careffully!"
-			#exit 0
-			;;
-  	esac
 done
+
+clear
+build_banner "SETTING UP USERS" "bs4it@2022"
+echo " "
+echo -e "${YELLOW}Finishing setting up users:${NC}"
+echo ""
+sleep 0.2
+echo ""
+# build content.html
+echo -e "Stopping web server..."
+kill -9 $webserver_pid
+echo -e "Removing firewall rule for HTTP..."
+if [[ $os_family == "debian" ]]; then
+   ufw --force delete allow http 1>/dev/null
+else
+   firewall-cmd --remove-service=http 1>/dev/null
+fi
+echo -e "Writting public keys..."
+sudo -u $adminuser bash -c "mkdir -p ~/.ssh && chmod 700 ~/.ssh && touch ~/.ssh/authorized_keys && chmod 600 ~/.ssh/authorized_keys && echo $adminuserkey > ~/.ssh/authorized_keys && cat /tmp/auth_keys.txt >> ~/.ssh/authorized_keys && sed -i '/^$/d' ~/.ssh/authorized_keys"
+echo -e "Cleaning up temporary files..."
+(rm -f /tmp/auth_keys.txt /tmp/content.html /tmp/index.html /tmp/cgi-bin/getData.py; rmdir /tmp/cgi-bin)
+# Allows only the remote admin user to login into SSH
+egrep ^AllowUsers /etc/ssh/sshd_config >> /dev/null
+if [ $? != "0" ]; then
+      echo "AllowUsers $adminuser" >> /etc/ssh/sshd_config
+else
+      sed -i "s/^AllowUsers.*/AllowUsers $adminuser/" /etc/ssh/sshd_config
+fi
+echo -e -n "Restarting SSH service..."
+ssh_status=""
+if [ $os_family == "debian" ]; then
+   systemctl restart ssh
+   ssh_status=$?
+else
+   systemctl restart sshd
+   ssh_status=$?
+fi
+if [ $ssh_status -eq 0 ]; then
+   echo -e "${LGREEN}OK"${NC}
+else
+   echo -e "${LRED}ERROR"${NC}
+   echo -e "${YELLOW}Something went wrong while restarting SSH. Please check the sshd_config file manually"${NC}
+   exit 1
+fi
+
 echo -e "Done!"
-sleep 1
+read -p "Press ENTER to continue."

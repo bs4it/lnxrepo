@@ -6,14 +6,18 @@ source $(dirname "$0")/functions/detect_os.sh
 source $(dirname "$0")/functions/build_banner.sh
 clear
 detect_os
+if [ $compatible_kernel == 0 ]; then
+	echo -e "However your Kernel \033[1;33m$kernel_major.$kernel_minor\033[0m is not the best for using XFS. At least Kernel \033[1;33m5.4\033[0m is recommended."
+	read -p "Press ENTER to continue."
+fi
 #os="debian-11"
 # Quit if not running suported O.S.
-if ! [[ $os == "debian-11" || $os == "ubuntu-20.04" ]]; then
-	echo -e "${LRED}This script does not support your O.S.${NC}"
-	echo -e "${LWHITE}You are running ${YELLOW}$os${NC}."
-	echo ""
-	exit 0
-fi
+# if ! [[ $os == "debian-11" || $os == "ubuntu-20.04" ]]; then
+# 	echo -e "${LRED}This script does not support your O.S.${NC}"
+# 	echo -e "${LWHITE}You are running ${YELLOW}$os${NC}."
+# 	echo ""
+# 	exit 0
+# fi
 
 clear
 build_banner "BS4IT - Linux Hardened Repository Setup Wizard" "bs4it@2022"
@@ -60,8 +64,6 @@ do
 				echo $exitcode
 				exit 2
 			fi
-			sleep 0.6
-            read -p "Press ENTER to continue."
 			;;
 		n|N)
 			;;
@@ -101,7 +103,6 @@ do
 			sleep 0.3
             bash $(dirname "$0")/modules/bs_set_users
 			sleep 0.6
-            read -p "Press ENTER to continue."
 			;;
 		n|N)
 			;;
@@ -126,8 +127,6 @@ do
 			echo ""
 			sleep 0.3
             bash $(dirname "$0")/modules/bs_set_iscsi
-			sleep 0.6
-            read -p "Press ENTER to continue."
 			;;
 		n|N)
 			;;

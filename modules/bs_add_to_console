@@ -291,4 +291,5 @@ sleep 0.3
 echo ""
 echo "Done!"
 trap 2
+read -p "Press ENTER to continue."
 exit 0

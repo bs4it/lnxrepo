@@ -165,6 +165,8 @@ do
                   echo ""
                   sleep 0.6
                   echo "Done!"
+                  sleep 0.1
+                  read -p "Press ENTER to continue."
                else
                   echo -e "${WHITE}No iSCSI disk is present. Please check the iSCSI target configuration and try again.${NC}"
                   echo ""

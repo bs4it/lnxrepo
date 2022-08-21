@@ -13,12 +13,12 @@ clear
 detect_os
 #os="debian-11"
 # Quit if not running suported O.S.
-if ! [[ $os == "debian-11" || $os == "ubuntu-20.04" ]]; then
-	echo -e "${LRED}This script does not support your O.S.${NC}"
-	echo -e "${LWHITE}You are running ${YELLOW}$os${NC}."
-	echo ""
-	exit 0
-fi
+# if ! [[ $os == "debian-11" || $os == "ubuntu-20.04" ]]; then
+# 	echo -e "${LRED}This script does not support your O.S.${NC}"
+# 	echo -e "${LWHITE}You are running ${YELLOW}$os${NC}."
+# 	echo ""
+# 	exit 0
+# fi
 clear
 build_banner "SYSTEM HARDENING CONFIGURATION" "bs4it@2022"
 echo " "
@@ -112,7 +112,7 @@ sleep 0.3
 echo -e "${LGREEN}OK"${NC}
 echo -e "${WHITE}Setting Firewall rules...${NC} "
 # call external script to setup firewall
-bash $(dirname "$0")/../functions/firewall_$os.sh $ssh_port
+bash $(dirname "$0")/../functions/firewall_$os_family.sh $ssh_port
 sleep 0.3
 echo -e -n "${WHITE}Setting Firewall rules accordingly${NC} "
 echo -e "${LGREEN}OK"${NC}

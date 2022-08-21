@@ -71,8 +71,13 @@ echo -e "${LRED}ALL DATA ON $blkdevice WILL BE PERMANENTELY LOST!${NC}"
 echo -e "${LRED}THIS PROCESS CANNOT BE UNDONE!${NC}"
 echo -e "${LRED}YOU MUST BE SURE ${YELLOW}$blkdevice ${LRED}IS EMPTY OR NO IMPORTANT DATA IS ON IT.${NC}"
 echo " "
-echo -n -e "${WHITE}Enter the device name again to continue:${YELLOW} "
-read confirmdevice
+
+while [[ -z $confirmdevice ]]
+do
+	echo -n -e "${WHITE}Enter the device name again to continue:${YELLOW} "
+	read confirmdevice
+done
+
 echo -e -n ${NC}
 if [ $confirmdevice != $blkdevice ]; then
 	echo -e "${YELLOW}The confirmation you entered is wrong, quitting.${NC}"
@@ -80,6 +85,7 @@ if [ $confirmdevice != $blkdevice ]; then
 	read -p "Press ENTER to continue."
 	exit 1
 fi
+
 clear
 build_banner "DISK CONFIGURATION" "bs4it@2022" "41"
 echo " "
@@ -87,9 +93,12 @@ echo -e "${YELLOW}POTENTIAL DATA LOSS WARNING!"
 echo " "
 echo -e "${WHITE}To cancel this operation press CTRL+C${NC}"
 confirmationcode=`cat /dev/urandom | tr -dc 'a-zA-Z0-9' | fold -w 6 | head -n 1`
-echo -n -e "${WHITE}Type this confirmation code to completely erase ${YELLOW}$blkdevice${NC} '$confirmationcode': ${YELLOW}"
-read typedconfirmationcode
-if [ $typedconfirmationcode != $confirmationcode ]; then
+while [[ -z $typedconfirmationcode ]]
+do
+	echo -n -e "${WHITE}Type this confirmation code to completely erase ${YELLOW}$blkdevice${NC} '$confirmationcode': ${YELLOW}"
+	read typedconfirmationcode
+done
+if [ $typedconfirmationcode !=	 $confirmationcode ]; then
 		echo ""
         echo -e "${YELLOW}Wrong code, quitting${NC}"
 		read -p "Press ENTER to continue."
