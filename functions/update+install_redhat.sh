@@ -1,17 +1,20 @@
 #!/bin/bash
 # 2022 - Fernando Della Torre @ BS4IT
 source $(dirname "$0")/colors.sh
-echo "Debian 11 detected"
-echo -n -e "${WHITE}Updating APT... ${NC}"
-update_result=$(apt-get update -y -qq  2>/dev/null)
-echo -e "${YELLOW}$update_result${NC}"
-echo -n -e "${WHITE}Upgrading System, wait... ${NC}"
-upgrade_result=$(apt-get dist-upgrade -y -qq  2>/dev/null)
-echo -e "${YELLOW}$upgrade_result${NC}"
+#echo "$os detected"
+echo -n -e "${WHITE}Upgrading System, wait... It takes time.${NC}"
+dnf update -y 2>/dev/null
+dnf upgrade -y 2>/dev/null
 echo -e "${WHITE}Installing packages... ${NC}"
-upgrade_result=$(apt-get dist-upgrade -y -qq  2>/dev/null)
-echo -n -e "${YELLOW}"
-apt-get install -y -qqq wget python3 net-tools vim tcpdump iptraf-ng htop sysstat lvm2 xfsprogs open-iscsi lsscsi scsitools gdisk nfs-common sudo tmux ufw 2>/dev/null
+# Install EPEL Repository
+if [[ $os == "ol-8."* ]]; then
+    dnf install oracle-epel-release-el8 -y
+else
+    #dnf install epel-release -y
+    dnf install https://dl.fedoraproject.org/pub/epel/epel-release-latest-8.noarch.rpm
+fi
+
+dnf install wget tar python3 net-tools vim tcpdump iptraf-ng htop sysstat lvm2 xfsprogs lsscsi gdisk nfs-utils sudo bash-completion policycoreutils-python-utils iscsi-initiator-utils -y
 packages_install_status=$?
 if [ $packages_install_status -eq 0 ]; then
   echo -e "${WHITE}Installing packages... ${LGREEN}OK${NC}"
@@ -24,61 +27,27 @@ fi
 
 echo -e "${WHITE}Building issue file...${NC}"
 echo -e "\033[1;34mBS4IT\033[0m - Linux Hardened Repository (\l)" > /etc/issue
+echo "Kernel \r on an \m" >> /etc/issue
 echo -e "${WHITE}Customising GRUB...${NC}"
 sed -i 's/^GRUB_TIMEOUT=.*/GRUB_TIMEOUT=3/' /etc/default/grub 2>/dev/null
 sed -i 's/^GRUB_DISTRIBUTOR=.*/GRUB_DISTRIBUTOR="BS4IT - Linux Hardened Repository"/' /etc/default/grub 2>/dev/null
 #sed -i 's/^GRUB_CMDLINE_LINUX_DEFAULT=.*/GRUB_CMDLINE_LINUX_DEFAULT=""/' /etc/default/grub 2>/dev/null
-update-grub2
-echo -e "${WHITE}Setting VIM mouse mode...${NC}"
-# Set vim mouse mode
-cat << 'EOF' > /etc/vim/vimrc.local
-" This file loads the default vim options at the beginning and prevents
-" that they are being loaded again later. All other options that will be set,
-" are added, or overwrite the default settings. Add as many options as you
-" whish at the end of this file.
-
-" Load the defaults
-source $VIMRUNTIME/defaults.vim
-
-" Prevent the defaults from being loaded again later, if the user doesn't
-" have a local vimrc (~/.vimrc)
-let skip_defaults_vim = 1
-
-
-" Set more options (overwrites settings from /usr/share/vim/vim80/defaults.vim)
-" Add as many options as you whish
-
-" Set the mouse mode to 'r'
-if has('mouse')
-  set mouse=r
-endif
-EOF
-echo -e "${WHITE}Setting console colors...${NC}"
-# Set colors
-alias ll='ls -alF'
-alias la='ls -A'
-alias l='ls -CF'
-alias ls='ls --color=auto'
-alias grep='grep --color=auto'
-alias fgrep='fgrep --color=auto'
-alias egrep='egrep --color=auto'
-cat << 'EOF' > /etc/profile.d/colors.sh
-# enable color support of ls and also add handy aliases
-if [ -x /usr/bin/dircolors ]; then
-    test -r ~/.dircolors && eval "$(dircolors -b ~/.dircolors)" || eval "$(dircolors -b)"
-    alias ls='ls --color=auto'
-    #alias dir='dir --color=auto'
-    #alias vdir='vdir --color=auto'
-
-    alias grep='grep --color=auto'
-    alias fgrep='fgrep --color=auto'
-    alias egrep='egrep --color=auto'
+if [[ -d /sys/firmware/efi ]]; then
+    grubconfigfile=$(readlink -e /etc/grub2-efi.cfg)
+else
+    grubconfigfile=$(readlink -e /etc/grub2.cfg)
 fi
-# some more ls aliases
-alias ll='ls -alF'
-alias la='ls -A'
-alias l='ls -CF'
-EOF
+grub2-mkconfig --output $grubconfigfile
+
+
+# Para Dell OMSA
+#yum install net-snmp-utils libcmpiCppImpl0.i686 libcmpiCppImpl0.x86_64 openwsman-server sblim-sfcb sblim-sfcc libwsman1.x86_64 libwsman1.i686 openwsman-client libxslt -y
+#wget https://dl.dell.com/FOLDER07414935M/1/OM-SrvAdmin-Dell-Web-LX-10.1.0.0-4561_A00.tar.gz
+#tar -zxvf OM-SrvAdmin-Dell-Web-LX-10.1.0.0-4561_A00.tar.gz
+#sh setup.sh --express --autostart
+alias vi=vim
+echo "alias vi=vim" >> /etc/profile
+
 echo -e "${WHITE}Creating log collection script...${NC}"
 mkdir -p /opt/bs4it
 cat << 'EOF' > /opt/bs4it/veeam_support_log_gen.sh
@@ -120,7 +89,10 @@ cat << 'EOF' > /etc/cron.d/veeam_support_log_gen
 EOF
 echo -e "${WHITE}Setting menu autostart...${NC}"
 echo "exec sudo /opt/bs4it/lnxrepo/bs4it_setup" > /etc/skel/.bash_profile
-echo "exec sudo /opt/bs4it/lnxrepo/bs4it_setup" > /home/localmaint/.bash_profile
+if [[ -d /home/localmaint ]]; then
+    echo "exec sudo /opt/bs4it/lnxrepo/bs4it_setup" > /home/localmaint/.bash_profile
+    chown localmaint:localmaint /home/localmaint/.bash_profile
+fi
 echo -e "Done!"
 sleep 2
 

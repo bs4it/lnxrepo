@@ -4,9 +4,29 @@ source $(dirname "$0")/../functions/colors.sh
 source $(dirname "$0")/../functions/IPprefix_by_netmask.sh
 source $(dirname "$0")/../functions/detect_os.sh
 source $(dirname "$0")/../functions/build_banner.sh
+nmtui="/usr/bin/nmtui"
 clear
-#detect_os
-os="debian-11"
+detect_os
+clear
+#os="debian-11"
+if [[ $os_family == "redhat" ]]; then
+	if [[ -f "$nmtui" ]]; then
+		echo "Invoking Network-Manager interface"
+		sleep 2
+		$nmtui
+		clear
+		echo "Restarting Network-Manager service"
+		/usr/bin/systemctl restart NetworkManager.service
+		echo -e "Done!"
+		sleep 2
+		read -p "Press ENTER to continue."
+		exit 0
+	else
+		echo "The nmtui command was not found. You should setup yout network manually."
+		read -p "Press ENTER to continue."
+	fi
+fi
+
 # Quit if not running suported O.S.
 if ! [[ $os == "debian-11" || $os == "ubuntu-20.04" ]]; then
 	echo -e "${LRED}This script does not support your O.S.${NC}"
@@ -192,4 +212,5 @@ sed -i "/$hostname/d" /etc/hosts > /dev/null
 echo -e "${WHITE}Wait...${NC}"
 sleep 4
 echo -e "Done!"
+read -p "Press ENTER to continue."
 sleep 2
