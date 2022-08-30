@@ -4,6 +4,7 @@ source $(dirname "$0")/functions/colors.sh
 source $(dirname "$0")/functions/IPprefix_by_netmask.sh
 source $(dirname "$0")/functions/detect_os.sh
 source $(dirname "$0")/functions/build_banner.sh
+#version=
 trap '' 2
 clear
 detect_os
