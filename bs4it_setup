@@ -107,8 +107,8 @@ do
 				sleep 2
 			else
 				# check if latest version is running
-				if [[ $version -eq $latest_version ]]; then
-					echo "Already up to date!"
+				if [[ $version == $latest_version ]]; then
+					echo "Already running latest release!"
 					sleep 2
 				else
 				# update it!
