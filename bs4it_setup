@@ -99,7 +99,7 @@ do
 		10)
 			echo "To be implemented..."
 			#Get latest version
-			latest_version=$(curl -Ls -o /dev/null -w %{url_effective} https://github.coma/bs4it/lnxrepo/releases/latest | rev | cut -d "/" -f1 | rev)
+			latest_version=$(curl -Ls -o /dev/null -w %{url_effective} https://github.com/bs4it/lnxrepo/releases/latest | rev | cut -d "/" -f1 | rev)
 			# check if it is valid
 			echo $latest_version
 			if [[ $latest_version == "latest" ]]; then
