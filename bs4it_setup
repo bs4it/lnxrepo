@@ -97,11 +97,10 @@ do
 			sleep 0.3
 			;;
 		10)
-			echo "To be implemented..."
+			echo "Checking for new version..."
 			#Get latest version
 			latest_version=$(curl -Ls -o /dev/null -w %{url_effective} https://github.com/bs4it/lnxrepo/releases/latest | rev | cut -d "/" -f1 | rev)
 			# check if it is valid
-			echo $latest_version
 			if [[ $latest_version == "latest" ]]; then
 				echo "Unable to check for new version."
 				sleep 2
@@ -111,15 +110,29 @@ do
 					echo "Already running latest release!"
 					sleep 2
 				else
-				# update it!
-					git checkout master
-					git pull
-					git checkout $latest_version
-					echo "Update applied. Press enter to logout and then login again"
-					read -p "Press ENTER to logout"
-					echo "Logging off..."
-					sleep 1
-					exit; logout
+					echo "Current version: $version, Available version: $latest_version"
+					echo -n "Do you want to upgrade it?"
+					while ! [[ $accept = 'Y' || $accept = 'y' || $accept = 'N' || $accept = 'n' ]]
+					do
+						echo -n -e "${WHITE}Do you want to upgrade it? ${YELLOW}(Y/N)${NC}:"
+						read accept
+						case $accept in
+							y|Y)
+								git -C $(dirname "$0") checkout master
+								git -C $(dirname "$0") pull
+								git -C $(dirname "$0") checkout $latest_version
+								echo "Update applied. Press enter to logout and then login again"
+								read -p "Press ENTER to logout"
+								echo "Logging off..."
+								sleep 1
+								exit; logout
+								;;
+							n|N)
+								echo "Quitting, bye!"
+								exit 0
+								;;
+						esac
+					done
 				fi
 			fi
 			sleep 0.3
