@@ -7,12 +7,13 @@ source $(dirname "$0")/functions/build_banner.sh
 version=$(git -C $(dirname "$0") tag -l)
 trap '' 2
 clear
-detect_os
+#detect_os
+os="debian-11"
+compatible_kernel=1
 if [ $compatible_kernel == 0 ]; then
 	echo -e "However your Kernel \033[1;33m$kernel_major.$kernel_minor\033[0m is not the best for using XFS. At least Kernel \033[1;33m5.4\033[0m is recommended."
 	read -p "Press ENTER to continue."
 fi
-#os="debian-11"
 # Quit if not running suported O.S.
 # if ! [[ $os == "debian-11" || $os == "ubuntu-20.04" ]]; then
 # 	echo -e "${LRED}This script does not support your O.S.${NC}"
@@ -96,7 +97,19 @@ do
 			;;
 		10)
 			echo "To be implemented..."
-			sleep 1
+			#Get latest version
+			latest_version=$(curl -Ls -o /dev/null -w %{url_effective} https://github.com/bs4it/lnxrepo/releases/latest | rev | cut -d "/" -f1 | rev)
+			# check if it is valid
+			if [[ $latest_version -eq "latest" ]]; then
+				echo "Unable to check por new version."
+				sleep 2
+				exit
+			fi
+			echo "depois"
+			#git checkout master
+			#git pull
+
+			#sleep 1
 			sleep 0.3
 			;;
 		11)
