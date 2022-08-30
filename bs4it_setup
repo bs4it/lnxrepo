@@ -4,7 +4,7 @@ source $(dirname "$0")/functions/colors.sh
 source $(dirname "$0")/functions/IPprefix_by_netmask.sh
 source $(dirname "$0")/functions/detect_os.sh
 source $(dirname "$0")/functions/build_banner.sh
-#version=
+version=$(git -C $(dirname "$0") tag -l)
 trap '' 2
 clear
 detect_os
@@ -25,7 +25,7 @@ while [[ $selection = "" || $selection -le 0  || $selection -gt $count ]]
 #while ! [[ $accept = 'Y' || $accept = 'y' || $accept = 'N' || $accept = 'n' ]]
 do
 	clear
-	build_banner "BS4IT - Linux Hardened Repository Setup" "bs4it@2022"
+	build_banner "BS4IT - Linux Hardened Repository Setup v$version" "bs4it@2022"
 	echo " "
 	echo -e "${YELLOW}Linux Hardened Repository Setup${NC}" 
 #	echo -e "${CYAN}$os detected.${NC}"
