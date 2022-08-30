@@ -108,7 +108,8 @@ do
 				# check if latest version is running
 				if [[ $version == $latest_version ]]; then
 					echo "Already running latest release!"
-					sleep 2
+					sleep 0.3
+					read -p "Press ENTER to return"
 				else
 					echo "Current version: $version, Available version: $latest_version"
 					while ! [[ $accept = 'Y' || $accept = 'y' || $accept = 'N' || $accept = 'n' ]]
