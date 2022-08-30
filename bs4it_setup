@@ -111,16 +111,15 @@ do
 					sleep 2
 				else
 					echo "Current version: $version, Available version: $latest_version"
-					echo -n "Do you want to upgrade it?"
 					while ! [[ $accept = 'Y' || $accept = 'y' || $accept = 'N' || $accept = 'n' ]]
 					do
 						echo -n -e "${WHITE}Do you want to upgrade it? ${YELLOW}(Y/N)${NC}:"
 						read accept
 						case $accept in
 							y|Y)
-								git -C $(dirname "$0") checkout master
-								git -C $(dirname "$0") pull
-								git -C $(dirname "$0") checkout $latest_version
+								git -C $(dirname "$0") checkout master --quiet
+								git -C $(dirname "$0") pull --quiet
+								git -C $(dirname "$0") checkout $latest_version --quiet
 								echo "Update applied. Press enter to logout and then login again"
 								read -p "Press ENTER to logout"
 								echo "Logging off..."
@@ -129,7 +128,6 @@ do
 								;;
 							n|N)
 								echo "Quitting, bye!"
-								exit 0
 								;;
 						esac
 					done
