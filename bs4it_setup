@@ -121,7 +121,8 @@ do
 								git -C $(dirname "$0") checkout master --quiet
 								git -C $(dirname "$0") pull --quiet
 								git -C $(dirname "$0") checkout $latest_version --quiet
-								echo "Update applied. Press enter to logout and then login again"
+								echo "Update applied."
+								echo "You must logout and then login again"
 								read -p "Press ENTER to logout"
 								echo "Logging off..."
 								sleep 1
