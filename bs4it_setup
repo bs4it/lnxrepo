@@ -5,7 +5,7 @@ source $(dirname "$0")/functions/IPprefix_by_netmask.sh
 source $(dirname "$0")/functions/detect_os.sh
 source $(dirname "$0")/functions/build_banner.sh
 #version=$(git -C $(dirname "$0") tag -l | tail -1)
-version=$(git describe --tags)
+version=$(git -C $(dirname "$0") describe --tags)
 trap '' 2
 clear
 #detect_os
