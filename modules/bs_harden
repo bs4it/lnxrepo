@@ -95,9 +95,37 @@ sleep 0.3
 echo -e "${LGREEN}OK"${NC}
 echo -e -n "${WHITE}Setting SSH password authentication to ${YELLOW}disabled${NC} "
 # Disables SSH password auth
-#sed -i "/^PasswordAuthentication.*/d" /etc/ssh/sshd_config
+echo -e -n "${WHITE}Setting SSH password authentication to ${YELLOW}disabled${NC} "
 sed -i "s/^PasswordAuthentication.*/PasswordAuthentication no/" /etc/ssh/sshd_config
 sed -i "s/^#PasswordAuthentication.*/PasswordAuthentication no/" /etc/ssh/sshd_config
+sleep 0.3
+echo -e "${LGREEN}OK"${NC}
+# Sets LoginGraceTime
+echo -e -n "${WHITE}Setting SSH LoginGraceTime to ${YELLOW}20 seconds${NC} "
+sed -i "s/^LoginGraceTime.*/LoginGraceTime 20/" /etc/ssh/sshd_config
+sed -i "s/^#LoginGraceTime.*/LoginGraceTime 20/" /etc/ssh/sshd_config
+sleep 0.3
+echo -e "${LGREEN}OK"${NC}
+# Sets MaxAuthTries
+echo -e -n "${WHITE}Setting SSH MaxAuthTries to ${YELLOW}3${NC} "
+sed -i "s/^MaxAuthTries.*/MaxAuthTries 3/" /etc/ssh/sshd_config
+sed -i "s/^#MaxAuthTries.*/MaxAuthTries 3/" /etc/ssh/sshd_config
+sleep 0.3
+echo -e "${LGREEN}OK"${NC}
+# Disables X11Forwarding
+echo -e -n "${WHITE}Setting SSH X11Forwarding to ${YELLOW}disabled${NC} "
+sed -i "s/^X11Forwarding.*/X11Forwarding no/" /etc/ssh/sshd_config
+sed -i "s/^#X11Forwarding.*/X11Forwarding no/" /etc/ssh/sshd_config
+sleep 0.3
+echo -e "${LGREEN}OK"${NC}
+# Disables Forwarding
+echo -e -n "${WHITE}Setting SSH AllowAgentForwarding, AllowAgentForwarding and AllowAgentForwarding to ${YELLOW}disabled${NC} "
+sed -i "s/^AllowAgentForwarding.*/AllowAgentForwarding no/" /etc/ssh/sshd_config
+sed -i "s/^#AllowAgentForwarding.*/AllowAgentForwarding no/" /etc/ssh/sshd_config
+sed -i "s/^AllowTcpForwarding.*/AllowTcpForwarding no/" /etc/ssh/sshd_config
+sed -i "s/^#AllowTcpForwarding.*/AllowTcpForwarding no/" /etc/ssh/sshd_config
+sed -i "s/^PermitTunnel.*/PermitTunnel no/" /etc/ssh/sshd_config
+sed -i "s/^#PermitTunnel.*/PermitTunnel no/" /etc/ssh/sshd_config
 sleep 0.3
 echo -e "${LGREEN}OK"${NC}
 echo -e -n "${WHITE}Setting SSH to allow only one user to login: ${YELLOW}$adminuser${NC} "
