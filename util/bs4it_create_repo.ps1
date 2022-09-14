@@ -4,7 +4,7 @@ $Folder = "backups" #Folder created inside base path
 $EnableXFSFastClone = $true
 $EnableBackupImmutability = $true
 $AlignDataBlocks = $true
-$ImmutabilityPeriod = 7
+$ImmutabilityPeriodDefault = 7
 
 
 function Set-UseUnsafeHeaderParsing
@@ -96,6 +96,20 @@ do {
     if (($RepoPerVMFile -ne "y") -and ($RepoPerVMFile -ne "n")) { Write-Host -ForegroundColor Red "Invalid input. Enter Y or N." }
     }
 while (($RepoPerVMFile -ne "y") -and ($RepoPerVMFile -ne "n"))
+
+do {
+    $ImmutabilityPeriod = ""
+    $ImmutabilityPeriod = (Read-Host -Prompt "Set immutability days. (Defaults to 7) ").ToLower()
+     if ( [string]::IsNullOrWhiteSpace($ImmutabilityPeriod) ) {
+         $ImmutabilityPeriod = $ImmutabilityPeriodDefault
+     }
+
+     if (([int]$ImmutabilityPeriod -lt 7 )) { $ImmutabilityPeriod = 7 }
+
+     if (($ImmutabilityPeriod -NotMatch '^\d+$')) { Write-Host -ForegroundColor Red "Invalid input. Enter a numeric value." }
+     }
+While (($ImmutabilityPeriod -NotMatch '^\d+$'))
+
 Write-Host ""
 Write-Host -NoNewline -ForegroundColor White "Creating Linux repository "
 Write-Host -NoNewline -ForegroundColor Yellow $RepoName
