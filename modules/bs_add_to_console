@@ -213,7 +213,11 @@ chown nobody. /tmp/status
 
 # Allow HTTP
 echo -e "Setting firewal to allow HTTP..."
-ufw allow http 1>/dev/null
+if [[ $os_family == "debian" ]]; then
+   ufw allow http 1>/dev/null
+else
+   firewall-cmd --add-service=http 1>/dev/null
+fi
 
 # Start web server as root
 # Store first PID in a var
@@ -249,7 +253,11 @@ echo -e "Stopping web server..."
 kill -9 $webserver_pid
 sleep 0.3
 echo -e "Removing firewall rule for HTTP..."
-ufw --force delete allow http 1>/dev/null
+if [[ $os_family == "debian" ]]; then
+   ufw --force delete allow http 1>/dev/null
+else
+   firewall-cmd --remove-service=http 1>/dev/null
+fi
 sleep 0.3
 echo -e "Cleaning up temporary files..."
 (rm -f /tmp/status /tmp/index.html /tmp/cgi-bin/status.py /tmp/server.json; rmdir /tmp/cgi-bin)
