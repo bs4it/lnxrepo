@@ -17,12 +17,12 @@ clear
 detect_os
 #os="debian-11"
 # Quit if not running suported O.S.
-if ! [[ $os == "debian-11" || $os == "ubuntu-20.04" ]]; then
-	echo -e "${LRED}This script does not support your O.S.${NC}"
-	echo -e "${LWHITE}You are running ${YELLOW}$os${NC}."
-	echo ""
-	exit 0
-fi
+# if ! [[ $os == "debian-11" || $os == "ubuntu-20.04" ]]; then
+# 	echo -e "${LRED}This script does not support your O.S.${NC}"
+# 	echo -e "${LWHITE}You are running ${YELLOW}$os${NC}."
+# 	echo ""
+# 	exit 0
+# fi
 clear
 build_banner "ADD TO VEEAM B&R CONSOLE" "bs4it@2022"
 echo " "
