@@ -48,11 +48,12 @@ do {
     # Clear Screen
     Clear-Host
     # Write welcome and first instructions
-    Write-Host -ForegroundColor Green "Add Linux Server"
+    Write-Host -ForegroundColor Blue "BS4IT Linux Hardened Repository"
+    Write-Host -ForegroundColor White "Add Linux Server"
     Write-Output ""
     Write-Host -ForegroundColor Red "$errmsg"
     # Ask source IP
-    $IP = Read-Host -Prompt "Server IP or FQDN"
+    $IP = Read-Host -Prompt "Linux Server IP or FQDN"
     #if (-Not ($IP -as [ipaddress] -as [Bool] -eq $true)){$errmsg = "Please enter a valid IPV4 address!"}
 #} while (($IP.Length -eq 0) -or -Not ($IP -as [ipaddress] -as [Bool] -eq $true))
 } while (($IP.Length -eq 0))

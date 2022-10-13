@@ -36,6 +36,7 @@ if ! [[ $os == "debian-11" || $os == "ubuntu-20.04" ]]; then
 fi
 #nic=`sudo lshw -class network | grep "logical name\|nome lógico" | cut -d ":" -f 2 | head -1 | xargs`
 nics=($(ls -ld /sys/class/net/* | grep -v virtual | rev | cut -d "/" -f 1 | rev))
+nics=($(find /sys/class/net/ -maxdepth 1 -type l | rev | cut -d "/" -f 1 | rev | grep -vx lo | sort))
 clear
 build_banner "NETWORK INTERFACE CONFIGURATION" "bs4it@2022"
 echo " "
