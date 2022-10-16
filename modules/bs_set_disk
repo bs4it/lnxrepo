@@ -58,7 +58,7 @@ build_banner "DISK CONFIGURATION" "bs4it@2022"
 echo " "
 echo -e "${YELLOW}The following SCSI devices are attached to this system:${NC}"
 echo " "
-lsblk -S -o NAME,TYPE,TRAN,VENDOR,MODEL,SIZE
+lsblk -d -o NAME,TYPE,TRAN,VENDOR,MODEL,SIZE
 echo " "
 while [[ -z "$blkdevice" ]]
 do
