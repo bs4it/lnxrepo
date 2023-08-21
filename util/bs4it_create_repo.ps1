@@ -7,6 +7,13 @@ $AlignDataBlocks = $true
 $ImmutabilityPeriodDefault = 7
 
 
+# Determines Veeam Version
+$corePath = Get-ItemProperty -Path "HKLM:\Software\Veeam\Veeam Backup and Replication\" -Name "CorePath"
+$depDLLPath = Join-Path -Path $corePath.CorePath -ChildPath "Packages\VeeamDeploymentDll.dll" -Resolve
+$file = Get-Item -Path $depDLLPath
+$version = $file.VersionInfo.ProductVersion
+
+
 function Set-UseUnsafeHeaderParsing
 {
     param(
