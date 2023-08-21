@@ -2,7 +2,7 @@
 # 2022 - Fernando Della Torre @ BS4IT
 detect_os () {
     # Define compatible distros
-    distros=("debian-11" "debian-11" "ubuntu-20.04" "ubuntu-22.04" "ol-8." "rhel-8.")
+    distros=("debian-11" "debian-12" "ubuntu-20.04" "ubuntu-22.04" "ol-8." "rhel-8.")
     kernel_minimal="5.4"
     # Get Release data
     source /etc/os-release
