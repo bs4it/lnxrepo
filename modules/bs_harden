@@ -128,16 +128,16 @@ sed -i "s/^PermitTunnel.*/PermitTunnel no/" /etc/ssh/sshd_config
 sed -i "s/^#PermitTunnel.*/PermitTunnel no/" /etc/ssh/sshd_config
 sleep 0.3
 echo -e "${LGREEN}OK"${NC}
-echo -e -n "${WHITE}Setting SSH to allow only one user to login: ${YELLOW}$adminuser${NC} "
-# Allows only the remote admin user to login into SSH
-egrep ^AllowUsers /etc/ssh/sshd_config >> /dev/null
-if [ $? != "0" ]; then
-        echo "AllowUsers $adminuser" >> /etc/ssh/sshd_config
-else
-        sed -i "s/^AllowUsers.*/AllowUsers $adminuser/" /etc/ssh/sshd_config
-fi
-sleep 0.3
-echo -e "${LGREEN}OK"${NC}
+# echo -e -n "${WHITE}Setting SSH to allow only one user to login: ${YELLOW}$adminuser${NC} "
+# # Allows only the remote admin user to login into SSH
+# egrep ^AllowUsers /etc/ssh/sshd_config >> /dev/null
+# if [ $? != "0" ]; then
+#         echo "AllowUsers $adminuser" >> /etc/ssh/sshd_config
+# else
+#         sed -i "s/^AllowUsers.*/AllowUsers $adminuser/" /etc/ssh/sshd_config
+# fi
+# sleep 0.3
+# echo -e "${LGREEN}OK"${NC}
 echo -e "${WHITE}Setting Firewall rules...${NC} "
 # call external script to setup firewall
 bash $(dirname "$0")/../functions/firewall_$os_family.sh $ssh_port
