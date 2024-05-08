@@ -43,7 +43,7 @@ do
 	echo -e " ${YELLOW} 5${NC} - Setup iSCSI"
 	echo -e " ${YELLOW} 6${NC} - Setup Disk, LVM, Filesystem and Mount Point + Permissions"
 	echo -e " ${YELLOW} 7${NC} - Add to Veeam backup & Replication Console"
-	echo -e " ${YELLOW} 8${NC} - Update repository components"
+	echo -e " ${YELLOW} 8${NC} - Install and set Monitoring Agent"
 	echo -e " ${YELLOW} 9${NC} - Install Dell OMSA"
 	echo -e " ${YELLOW}10${NC} - Check for tool updates"
 	echo -e " ${YELLOW}11${NC} - Exit to shell"
