@@ -1,0 +1,102 @@
+#!/bin/bash
+# 2022 - Fernando Della Torre @ BS4IT
+source $(dirname "$0")/../functions/colors.sh
+source $(dirname "$0")/../functions/detect_os.sh
+source $(dirname "$0")/../functions/build_banner.sh
+clear
+detect_os
+
+# # Quit if not running suported O.S.
+# if ! [[ $os == "debian-11" || $os == "ubuntu-20.04" ]]; then
+# 	echo -e "${LRED}This script does not support your O.S.${NC}"
+# 	echo -e "${LWHITE}You are running ${YELLOW}$os${NC}."
+# 	echo ""
+# 	exit 0
+# fi
+
+clear
+build_banner "MONITORING" "bs4it@2022"
+echo " "
+echo -e "${YELLOW}Step 8 - Install and set Monitoring Agent:${NC}"
+echo " "
+echo -e "Do you want to install and configure the system monitoring agent? "
+echo -e "You need to have your network working to proceed."
+echo " "
+accept=""
+#echo $os_family
+while ! [[ $accept = 'Y' || $accept = 'y' || $accept = 'N' || $accept = 'n' ]]
+do
+	echo -n -e "Install packages now? ${YELLOW}(Y/N)${NC}:"
+	read accept
+	case $accept in
+		y|Y)
+			echo ""
+			sleep 0.3
+			echo "Updating repositories indexes... Wait."
+			apt update -y -qqq
+			echo "Installing packages and dependencies... Wait."
+			apt install zabbix-agent2 -y -qqq
+			echo " "
+            read -p "Press ENTER to continue."
+			clear
+			build_banner "MONITORING" "bs4it@2022"
+			echo " "
+			echo -e "${YELLOW}Step 8 - Install and set Monitoring Agent:${NC}"
+			echo " "
+			echo -e "You need to provide the monitoring proxy address, IP or FQDN. "
+			echo -e "Whats the proxy address?"
+			echo " "
+			echo $prxaddr
+			while [[ -z $prxaddr ]]
+			do
+					read -p "Proxy address:" prxaddr
+			done
+			echo -e "OK..."
+			sleep 1
+			echo -n "Building config file..."
+			hostname=$(hostname -s)
+			psk=$(openssl rand -hex 32)
+			mkdir -p /etc/zabbix/psk/
+			echo $psk > /etc/zabbix/psk/agent.psk
+			chown zabbix:zabbix /etc/zabbix/psk/agent.psk
+			chmod 600 /etc/zabbix/psk/agent.psk
+			cat > /etc/zabbix/zabbix_agent2.conf <<EOF
+LogFile=/var/log/zabbix/zabbix_agent2.log
+LogFileSize=0
+DebugLevel=3
+Timeout=30
+Server=127.0.0.1
+ListenIP=127.0.0.1
+ServerActive=$prxaddr
+HostnameItem=system.hostname
+TLSConnect=psk
+TLSAccept=psk
+TLSPSKFile=/etc/zabbix/psk/agent.psk
+TLSPSKIdentity=$hostname
+Include=/etc/zabbix/zabbix_agent2.d/*.conf
+ControlSocket=/tmp/agent.sock
+Include=./zabbix_agent2.d/plugins.d/*.conf
+EOF
+			sleep 0.5
+			echo -e "Done."
+			echo -n "Restarting service..."
+			systemctl restart zabbix-agent2.service
+			echo -e "Done, wait!"
+			sleep 2
+			clear
+			build_banner "MONITORING" "bs4it@2022"
+			echo " "
+			echo -e "${YELLOW}Send the following info to the Monitoring Team:${NC}"
+			echo -e ""
+			echo -e "Server name: ${WHITE}$hostname${NC}"
+			echo -e "Server PSK: ${WHITE}$psk${NC}"
+			echo -e ""
+			read -p "You're done! Press ENTER to return to main menu."
+			echo "wait..."
+			sleep 1
+			;;
+		n|N)
+			exit 1
+			;;
+  	esac
+done
