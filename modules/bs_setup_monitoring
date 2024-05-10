@@ -73,6 +73,7 @@ TLSConnect=psk
 TLSAccept=psk
 TLSPSKFile=/etc/zabbix/psk/agent.psk
 TLSPSKIdentity=$hostname
+UserParameter=mdadm,if [ -f /proc/mdstat ]; then egrep -c "\[.*_.*\]" /proc/mdstat; else echo 1000; fi
 Include=/etc/zabbix/zabbix_agent2.d/*.conf
 ControlSocket=/tmp/agent.sock
 Include=./zabbix_agent2.d/plugins.d/*.conf

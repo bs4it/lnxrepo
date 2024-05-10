@@ -11,7 +11,7 @@ echo -e "${YELLOW}$upgrade_result${NC}"
 echo -e "${WHITE}Installing packages... ${NC}"
 upgrade_result=$(apt-get dist-upgrade -y -qq  2>/dev/null)
 echo -n -e "${YELLOW}"
-apt-get install -y -qqq wget python3 net-tools vim tcpdump iptraf-ng htop sysstat lvm2 xfsprogs open-iscsi lsscsi scsitools gdisk nfs-common sudo tmux ufw 2>/dev/null
+apt-get install -y -qqq wget curl python3 net-tools vim tcpdump iptraf-ng htop sysstat lvm2 xfsprogs open-iscsi lsscsi scsitools gdisk nfs-common sudo tmux ufw 2>/dev/null
 packages_install_status=$?
 if [ $packages_install_status -eq 0 ]; then
   echo -e "${WHITE}Installing packages... ${LGREEN}OK${NC}"

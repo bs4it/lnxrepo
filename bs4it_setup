@@ -148,7 +148,7 @@ do
 			trap '' 2
 			;;
 		12)
-			echo "Logging off..."
+			echo "Logging off..."0
 			sleep 1
 			exit; logout
 			sleep 4
