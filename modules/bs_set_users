@@ -457,7 +457,7 @@ chmod +x /tmp/cgi-bin/getData.py
 
 # Create auth_keys.txt file and set permissions
 touch /tmp/auth_keys.txt
-chown nobody. /tmp/auth_keys.txt
+chown nobody:nobody /tmp/auth_keys.txt
 
 # Allow HTTP
 echo -e "Setting firewal to allow HTTP..."
