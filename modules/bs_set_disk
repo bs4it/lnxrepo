@@ -211,6 +211,7 @@ else
 fi
 sleep 0.3
 echo -n -e "${WHITE}Mounting all filesystems in /etc/fstab: ${NC}"
+
 mount -a
 result=$?
 sleep 0.3
