@@ -2,7 +2,7 @@
 # 2022 - Fernando Della Torre @ BS4IT
 detect_os () {
     # Define compatible distros
-    distros=("debian-11" "debian-12" "ubuntu-20.04" "ubuntu-22.04" "ol-8." "rhel-8.")
+    distros=("debian-12" "debian-13" "ubuntu-20.04" "ubuntu-22.04")
     kernel_minimal="5.4"
     # Get Release data
     source /etc/os-release
@@ -37,9 +37,9 @@ detect_os () {
         echo -e ""
         echo -e "\033[1;37mThe following operating systems are supported:\033[0m"
         echo -e "\033[1;33mUbuntu Server 20.04\033[0m"
-        echo -e "\033[1;33mDebian 11\033[0m"
-        echo -e "\033[1;33mOracle Enterprise Linux 8\033[0m"
-        echo -e "\033[1;33mRed Hat Enterprise Linux 8\033[0m"
+        echo -e "\033[1;33mUbuntu Server 22.04\033[0m"
+        echo -e "\033[1;33mDebian 12\033[0m"
+        echo -e "\033[1;33mDebian 3\033[0m"
         echo ""
         echo -e "\033[1;37mMinimum Kernel version: \033[1;33m$kernel_minimal\033[0m"
         read -p "Press ENTER to quit."
